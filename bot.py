@@ -6,7 +6,6 @@ timer = time.localtime()
 
 bot = telebot.TeleBot("951724945:AAGPfKwEp9vM44KXnbr0RsFsRGh1xuiHhc4")
 
-
 F = 0
 Flag = 0
 Flagok = 0
@@ -37,6 +36,20 @@ def send_welcome(message):
                 
         bot.send_message(message.chat.id,"Хочешь добавить TOKEN - жми на кнопочку ", parse_mode = "html", reply_markup = markup)
 
+
+        
+@bot.message_handler(commands = ['problem'])
+def send_welcome(message):
+        global F
+        F = 1
+        
+        st2 = open('qaz/problem.webp', 'rb')
+        bot.send_sticker(message.chat.id, st2)
+
+        bot.send_message(message.chat.id, "Ты уверен??? Если ты нашел ошибку... прости нас 😥", parse_mode = "html")
+
+        bot.send_message(message.chat.id, "Кратко опиши проблему, мы постараемся ее исправить в скором времени 😬\n",\
+                         parse_mode = "html")
         
 @bot.message_handler(content_types = ['text'])
 def dialog(message):
@@ -46,6 +59,9 @@ def dialog(message):
                 if (message.text == 'Ввод TOKEN') and (Flag == 1):
                 	Flag = 0
                 	Flagok = 1
+                elif (F == 1):
+                        bot.send_message('538587223', "Имя пользователя, оставившего комментарий: @" + message.chat.username + "\nКомментарий: " + message.text, parse_mode = "html")
+                        F = 0
                 else:
                         bot.send_message(message.chat.id, 'Странно, такой команды нет...', parse_mode = "html", reply_markup = types.ReplyKeyboardRemove())
                         Flag = 0
@@ -55,4 +71,3 @@ bot.polling()
 
 while True:
         pass
-
