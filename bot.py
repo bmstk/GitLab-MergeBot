@@ -6,9 +6,16 @@ timer = time.localtime()
 
 bot = telebot.TeleBot("951724945:AAGPfKwEp9vM44KXnbr0RsFsRGh1xuiHhc4")
 
+
+F = 0
+Flag = 0
+Flagok = 0
+
 @bot.message_handler(commands = ['start'])
 def send_welcome(message):
-
+        global Flag
+        Flag = 1
+        
         st = open('qaz/privet.webp', 'rb')
         bot.send_sticker(message.chat.id, st)
 
@@ -23,8 +30,29 @@ def send_welcome(message):
 
         if 23 <= timer[3] < 5:
                 bot.send_message(message.chat.id, "Доброй ночи... добрая ночь... в общем, привет, @" + message.chat.username + "! Ты чего не спишь, давай не засиживайся, спать - полезно 😴", parse_mode = "html")
+
+        item1 = types.KeyboardButton("Ввод TOKEN")
+        markup = types.ReplyKeyboardMarkup(resize_keyboard = True)
+        markup.add(item1)
                 
+        bot.send_message(message.chat.id,"Хочешь добавить TOKEN - жми на кнопочку ", parse_mode = "html", reply_markup = markup)
+
+        
+@bot.message_handler(content_types = ['text'])
+def dialog(message):
+        global Flag, Flagok, F
+        
+        if message.chat.type == 'private':
+                if (message.text == 'Ввод TOKEN') and (Flag == 1):
+                	Flag = 0
+                	Flagok = 1
+                else:
+                        bot.send_message(message.chat.id, 'Странно, такой команды нет...', parse_mode = "html", reply_markup = types.ReplyKeyboardRemove())
+                        Flag = 0
+                        Flagok = 0
+
 bot.polling()
 
 while True:
         pass
+
