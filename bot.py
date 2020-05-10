@@ -1,10 +1,14 @@
 import telebot
 from telebot import types
+from pymongo import MongoClient
 import time
 
 timer = time.localtime()
 
 bot = telebot.TeleBot("951724945:AAGPfKwEp9vM44KXnbr0RsFsRGh1xuiHhc4")
+
+client = MongoClient("mongodb+srv://mergebot:klainer1@mergebot-bnkw8.mongodb.net/mergebot?retryWrites=true&w=majority")
+db = client.mergebot
 
 F = 0
 Flag = 0
@@ -30,13 +34,40 @@ def send_welcome(message):
         if 23 <= timer[3] < 5:
                 bot.send_message(message.chat.id, "Доброй ночи... добрая ночь... в общем, привет, @" + message.chat.username + "! Ты чего не спишь, давай не засиживайся, спать - полезно 😴", parse_mode = "html")
 
-        item1 = types.KeyboardButton("Ввод TOKEN")
-        markup = types.ReplyKeyboardMarkup(resize_keyboard = True)
-        markup.add(item1)
+        if db.token.count_documents({"id" : message.chat.id}) == 1:
+                cursor = db.token.find_one({"id" : message.chat.id})
+                cur = []
+                cursor1 = dict(cursor)
+                for j in cursor1['token']:
+                        cur.append(j)
+                        cur.append('\n')
+                stroka = ' '.join(cur)
                 
-        bot.send_message(message.chat.id,"Хочешь добавить TOKEN - жми на кнопочку ", parse_mode = "html", reply_markup = markup)
+                bot.send_message(message.chat.id, "По твоему id в базе данных я нашел следующие TOKEN: " + stroka, parse_mode = "html")
 
+                item1 = types.KeyboardButton("Ввод TOKEN")
+                markup = types.ReplyKeyboardMarkup(resize_keyboard = True)
+                markup.add(item1)
+                
+                bot.send_message(message.chat.id,"Хочешь добавить TOKEN - жми на кнопочку ", parse_mode = "html", reply_markup = markup)
+        elif db.token.count_documents({"id" : message.chat.id}) > 1:
+                bot.send_message(message.chat.id, "По твоему id в базе данных я нашел больше одного упоминания! Это ненормально, но твоей вины здесь нет.\
+Напиши /problem и опиши этот случай(можешь перекопировать текст моего сообщения). Извини за неудобства 😬", parse_mode = "html")
+                
+        elif db.token.count_documents({"id" : message.chat.id}) == 0:
+                db.token.insert_one({"id" : message.chat.id, "token" : []})
+                
+                bot.send_message(message.chat.id, "@" + message.chat.username +  ", ты у нас впервые, твой id был удачно записан в базу данных.", parse_mode = "html")
 
+                inline_item1 = types.InlineKeyboardButton('Как получить TOKEN', url = 'https://git.iu7.bmstu.ru/')
+                inline_bt1 = types.InlineKeyboardMarkup()
+                inline_bt1.add(inline_item1)
+
+                item1 = types.KeyboardButton("Ввод TOKEN")
+                markup = types.ReplyKeyboardMarkup(resize_keyboard = True)
+                markup.add(item1)
+                
+                bot.send_message(message.chat.id, "Теперь давай добавим TOKEN. Если ты не знаешь, где его найти, нажми на кнопочку ", parse_mode = "html", reply_markup = markup)
         
 @bot.message_handler(commands = ['problem'])
 def send_welcome(message):
@@ -59,6 +90,20 @@ def dialog(message):
                 if (message.text == 'Ввод TOKEN') and (Flag == 1):
                 	Flag = 0
                 	Flagok = 1
+                	
+                elif (Flagok == 1):
+                        cursor3 = db.token.find_one({"id" : message.chat.id})
+                        cur = []
+                        cursor4 = dict(cursor3)
+                        #print(cursor4)
+                        for j in cursor4["token"]:
+                                cur.append(j)
+                        cur.append(message.text)
+                        
+                        db.token.find_one_and_update({"id" : message.chat.id}, {'$set' : {"token" : cur}})
+
+                        bot.send_message(message.chat.id, "Ваш TOKEN был успешно добавлен в нашу базу данных 🎉", parse_mode = "html", reply_markup = types.ReplyKeyboardRemove())
+                        Flagok = 0
                 elif (F == 1):
                         bot.send_message('538587223', "Имя пользователя, оставившего комментарий: @" + message.chat.username + "\nКомментарий: " + message.text, parse_mode = "html")
                         F = 0
@@ -71,3 +116,4 @@ bot.polling()
 
 while True:
         pass
+
