@@ -5,7 +5,7 @@ import time
 
 timer = time.localtime()
 
-bot = telebot.TeleBot("951724945:AAGPfKwEp9vM44KXnbr0RsFsRGh1xuiHhc4")
+bot = telebot.TeleBot("TOKEN")
 
 client = MongoClient("mongodb+srv://mergebot:klainer1@mergebot-bnkw8.mongodb.net/mergebot?retryWrites=true&w=majority")
 db = client.mergebot
