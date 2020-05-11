@@ -3,21 +3,24 @@ from telebot import types
 from pymongo import MongoClient
 import time
 
+with open("settings_for_bot.txt", "r") as f:
+        flines = f.readlines()
+
 timer = time.localtime()
 
-bot = telebot.TeleBot("TOKEN")
+bot = telebot.TeleBot(flines[0][:len(flines[0]) - 1])
 
-client = MongoClient("mongodb+srv://mergebot:klainer1@mergebot-bnkw8.mongodb.net/mergebot?retryWrites=true&w=majority")
+client = MongoClient(flines[1][:len(flines[1])])
 db = client.mergebot
 
 F = 0
-Flag = 0
-Flagok = 0
+F1 = 0
+F2 = 0
 
 @bot.message_handler(commands = ['start'])
 def send_welcome(message):
-        global Flag
-        Flag = 1
+        global F1
+        F1 = 1
 
         if (message.chat.username == None) and (db.token.count_documents({"id" : message.chat.id}) == 0):
                 inline_item2 = types.InlineKeyboardButton('Создание Username', url = 'https://telegram-rus.ru/nik')
@@ -82,9 +85,9 @@ def send_welcome(message):
                 bot.send_message(message.chat.id, NameUser +  ", ты у нас впервые, твой id был удачно записан в базу данных.", parse_mode = "html", reply_markup = markup)
                 
                 bot.send_message(message.chat.id, "Теперь давай добавим TOKEN. Если ты не знаешь, где его найти, нажми на кнопочку ", parse_mode = "html", reply_markup = inline_bt1)
-        
+
 @bot.message_handler(commands = ['problem'])
-def send_welcome(message):
+def send_problem(message):
         global F
         F = 1
         
@@ -98,7 +101,7 @@ def send_welcome(message):
         
 @bot.message_handler(content_types = ['text'])
 def dialog(message):
-        global Flag, Flagok, F
+        global F1, F2, F
         
         if message.chat.username == None:
                 NameUser = str(message.chat.id)
@@ -106,11 +109,11 @@ def dialog(message):
                 NameUser = "@" + message.chat.username
         
         if message.chat.type == 'private':
-                if (message.text == 'Ввод TOKEN') and (Flag == 1):
-                	Flag = 0
-                	Flagok = 1
+                if (message.text == 'Ввод TOKEN') and (F1 == 1):
+                	F1 = 0
+                	F2 = 1
                 	
-                elif (Flagok == 1):
+                elif (F2 == 1):
                         cursor3 = db.token.find_one({"id" : message.chat.id})
                         cur = []
                         cursor4 = dict(cursor3)
@@ -121,18 +124,13 @@ def dialog(message):
                         db.token.find_one_and_update({"id" : message.chat.id}, {'$set' : {"token" : cur}})
 
                         bot.send_message(message.chat.id, "Ваш TOKEN был успешно добавлен в нашу базу данных 🎉", parse_mode = "html", reply_markup = types.ReplyKeyboardRemove())
-                        Flagok = 0
+                        F2 = 0
                 elif (F == 1):
                         bot.send_message('538587223', "Имя пользователя, оставившего комментарий: " + NameUser + "\nКомментарий: " + message.text, parse_mode = "html")
                         F = 0
                 else:
                         bot.send_message(message.chat.id, 'Странно, такой команды нет...', parse_mode = "html", reply_markup = types.ReplyKeyboardRemove())
-                        Flag = 0
-                        Flagok = 0
+                        F1 = 0
+                        F2 = 0
 
 bot.polling()
-
-while True:
-        pass
-
-
