@@ -309,3 +309,4 @@ pip-selfcheck.json
 .idea/modules.xml
 .idea/vcs.xml
 temp.py
+/bot/bot.py
