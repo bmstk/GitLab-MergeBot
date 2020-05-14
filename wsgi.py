@@ -5,6 +5,7 @@ app = cherrypy.tree.mount(WebhookServer(), '/')
 
 if __name__ == '__main__':
     bot.remove_webhook()
+    sleep(2)
     bot.set_webhook(url=config.WEBHOOK_URL_BASE + config.WEBHOOK_URL_PATH,
                     certificate=open(config.WEBHOOK_SSL_CERT, 'r'))
 
