@@ -121,4 +121,8 @@ def process_step_3(message):
         
         bot.send_message('538587223', "Имя пользователя, оставившего комментарий: " + NameUser + "\nКомментарий: " + message.text, parse_mode = "html")
 
+@bot.message_handler(content_types = ['text'])
+def answer(message):
+        bot.send_message(message.chat.id, "К сожалению, я не знаю, что мне ответить 😓\nНапиши / , чтобы увидеть доступные команды", parse_mode = "html")
+
 bot.polling()
