@@ -13,15 +13,8 @@ bot = telebot.TeleBot(flines[0][:len(flines[0]) - 1])
 client = MongoClient(flines[1][:len(flines[1])])
 db = client.mergebot
 
-F = 0
-F1 = 0
-F2 = 0
-
 @bot.message_handler(commands = ['start'])
 def send_welcome(message):
-        global F1
-        F1 = 1
-
         if (message.chat.username == None) and (db.token.count_documents({"id" : message.chat.id}) == 0):
                 inline_item2 = types.InlineKeyboardButton('Создание Username', url = 'https://telegram-rus.ru/nik')
                 inline_bt2 = types.InlineKeyboardMarkup()
@@ -66,6 +59,8 @@ def send_welcome(message):
                 markup.add(item1)
                 
                 bot.send_message(message.chat.id,"Хочешь добавить TOKEN - жми на кнопочку ", parse_mode = "html", reply_markup = markup)
+
+                bot.register_next_step_handler(message, process_step_1)
                 
         elif db.token.count_documents({"id" : message.chat.id}) > 1:
                 bot.send_message(message.chat.id, "По твоему id в базе данных я нашел больше одного упоминания! Это ненормально, но твоей вины здесь нет.\
@@ -86,11 +81,28 @@ def send_welcome(message):
                 
                 bot.send_message(message.chat.id, "Теперь давай добавим TOKEN. Если ты не знаешь, где его найти, нажми на кнопочку ", parse_mode = "html", reply_markup = inline_bt1)
 
+                bot.register_next_step_handler(message, process_step_1)
+
+def process_step_1(message):
+        if message.text == 'Ввод TOKEN':
+                bot.register_next_step_handler(message, process_step_2)
+        else:
+                bot.send_message(message.chat.id, 'Странно, такой команды нет...', parse_mode = "html", reply_markup = types.ReplyKeyboardRemove())
+
+def process_step_2(message):
+        cursor3 = db.token.find_one({"id" : message.chat.id})
+        cur = []
+        cursor4 = dict(cursor3)
+        for j in cursor4["token"]:
+                cur.append(j)
+        cur.append(message.text)
+                        
+        db.token.find_one_and_update({"id" : message.chat.id}, {'$set' : {"token" : cur}})
+
+        bot.send_message(message.chat.id, "Ваш TOKEN был успешно добавлен в нашу базу данных 🎉", parse_mode = "html", reply_markup = types.ReplyKeyboardRemove())
+
 @bot.message_handler(commands = ['problem'])
 def send_problem(message):
-        global F
-        F = 1
-        
         st2 = open('qaz/problem.webp', 'rb')
         bot.send_sticker(message.chat.id, st2)
 
@@ -98,39 +110,15 @@ def send_problem(message):
 
         bot.send_message(message.chat.id, "Кратко опиши проблему, мы постараемся ее исправить в скором времени 😬\n",\
                          parse_mode = "html", reply_markup = types.ReplyKeyboardRemove())
+
+        bot.register_next_step_handler(message, process_step_3)
         
-@bot.message_handler(content_types = ['text'])
-def dialog(message):
-        global F1, F2, F
-        
+def process_step_3(message):
         if message.chat.username == None:
                 NameUser = str(message.chat.id)
         else:
                 NameUser = "@" + message.chat.username
         
-        if message.chat.type == 'private':
-                if (message.text == 'Ввод TOKEN') and (F1 == 1):
-                	F1 = 0
-                	F2 = 1
-                	
-                elif (F2 == 1):
-                        cursor3 = db.token.find_one({"id" : message.chat.id})
-                        cur = []
-                        cursor4 = dict(cursor3)
-                        for j in cursor4["token"]:
-                                cur.append(j)
-                        cur.append(message.text)
-                        
-                        db.token.find_one_and_update({"id" : message.chat.id}, {'$set' : {"token" : cur}})
-
-                        bot.send_message(message.chat.id, "Ваш TOKEN был успешно добавлен в нашу базу данных 🎉", parse_mode = "html", reply_markup = types.ReplyKeyboardRemove())
-                        F2 = 0
-                elif (F == 1):
-                        bot.send_message('538587223', "Имя пользователя, оставившего комментарий: " + NameUser + "\nКомментарий: " + message.text, parse_mode = "html")
-                        F = 0
-                else:
-                        bot.send_message(message.chat.id, 'Странно, такой команды нет...', parse_mode = "html", reply_markup = types.ReplyKeyboardRemove())
-                        F1 = 0
-                        F2 = 0
+        bot.send_message('538587223', "Имя пользователя, оставившего комментарий: " + NameUser + "\nКомментарий: " + message.text, parse_mode = "html")
 
 bot.polling()
