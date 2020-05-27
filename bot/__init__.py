@@ -5,6 +5,7 @@ import cherrypy
 import simplejson as simplejson
 
 from bot import config
+from bot.merger_bot import bot
 
 filename = './webhookPayloads.txt'
 if os.path.exists(filename):
@@ -23,8 +24,6 @@ class WebhookServer(object):
         str_obj = json.dumps(raw_json)
         f.write(str_obj + '\n')
         f.close()
-        with open("./bot/bot_settings.json", "r") as f:
-            data = json.load(f)
-        user_name = data["object_attributes"]["assignee_id"]
-        bot.send_message(87763438, text=user_name)
+        user_name = raw_json["object_attributes"]["assignee_id"]
+        bot.send_message(chat_id=87763438, text=user_name)
         return ''
