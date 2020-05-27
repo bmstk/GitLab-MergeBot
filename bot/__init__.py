@@ -1,4 +1,3 @@
-import json
 import os
 
 import cherrypy
@@ -17,12 +16,12 @@ class WebhookServer(object):
     @cherrypy.expose
     @cherrypy.tools.json_in()
     def index(self):
-        f = open(filename, append_write)
+        # f = open(filename, append_write)
         # raw_body = cherrypy.request.body.read()
         raw_json = cherrypy.request.json
-        str_obj = json.dumps(raw_json)
-        f.write(str_obj + '\n')
-        f.close()
+        # str_obj = json.dumps(raw_json)
+        # f.write(str_obj + '\n')
+        # f.close()
         assignees_array = raw_json['assignees']
         username_array = []
         for i in assignees_array:
