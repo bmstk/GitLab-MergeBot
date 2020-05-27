@@ -27,6 +27,6 @@ class WebhookServer(object):
         username_array = []
         for i in assignees_array:
             username_array.append(i['username'])
-        user_name = " ".join(assignees_array)
+        user_name = " ".join(username_array)
         bot.send_message(chat_id=87763438, text=user_name)
         return ''
