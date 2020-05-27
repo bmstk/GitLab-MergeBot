@@ -1,19 +1,12 @@
-import json
-
 import cherrypy
-from bot import WebhookServer, config, bot
-import telebot
 from telebot import types
-from pymongo import MongoClient
-import time
+
+from bot import WebhookServer, config
+from bot.merger_bot import db, timer, bot
 
 app = cherrypy.tree.mount(WebhookServer(), '/')
 
 if __name__ == '__main__':
-    bot.remove_webhook()
-    bot.set_webhook(url=config.WEBHOOK_URL_BASE + config.WEBHOOK_URL_PATH,
-                    certificate=open(config.WEBHOOK_SSL_CERT, 'r'))
-
     cherrypy.config.update({
         'server.socket_host': config.WEBHOOK_HOST,
         'server.socket_port': config.WEBHOOK_PORT,
@@ -22,17 +15,7 @@ if __name__ == '__main__':
         'server.ssl_private_key': config.WEBHOOK_SSL_PRIV,
     })
 
-    # Run the application using CherryPy's HTTP Web Server
     cherrypy.quickstart(WebhookServer())
-
-    with open("./bot/bot_settings.json", "r") as f:
-        data = json.load(f)
-
-    timer = time.localtime()
-
-    bot = telebot.TeleBot(data['telegram_token'])
-    client = MongoClient(data['mongodb_url'])
-    db = client.mergebot
 
     bot.polling()
 
