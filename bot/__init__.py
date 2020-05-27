@@ -2,7 +2,6 @@ import json
 import os
 
 import cherrypy
-import simplejson as simplejson
 
 from bot import config
 from bot.merger_bot import bot
@@ -24,6 +23,9 @@ class WebhookServer(object):
         str_obj = json.dumps(raw_json)
         f.write(str_obj + '\n')
         f.close()
-        user_name = raw_json['assignees']['username']
+        assignees_array = []
+        for i in raw_json['assignees']:
+            assignees_array.append(i['username'])
+        user_name = " ".join(assignees_array)
         bot.send_message(chat_id=87763438, text=user_name)
         return ''
