@@ -24,6 +24,6 @@ class WebhookServer(object):
         str_obj = json.dumps(raw_json)
         f.write(str_obj + '\n')
         f.close()
-        user_name = raw_json["object_attributes"]["assignee_id"]
+        user_name = raw_json['object_attributes']['assignee']['username']
         bot.send_message(chat_id=87763438, text=user_name)
         return ''
