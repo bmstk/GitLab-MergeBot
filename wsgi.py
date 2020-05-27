@@ -1,3 +1,5 @@
+import threading
+
 import cherrypy
 from telebot import types
 
@@ -15,9 +17,10 @@ if __name__ == '__main__':
         'server.ssl_private_key': config.WEBHOOK_SSL_PRIV,
     })
 
-    cherrypy.quickstart(WebhookServer())
-
-    bot.polling()
+    server_thread = threading.Thread(target=cherrypy.quickstart, args=(WebhookServer(),))
+    bot_thread = threading.Thread(target=bot.polling)
+    server_thread.start()
+    bot_thread.start()
 
 
 @bot.message_handler(commands=['start'])
