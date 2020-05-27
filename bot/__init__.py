@@ -6,8 +6,6 @@ import simplejson as simplejson
 
 from bot import config
 
-bot = telebot.TeleBot(config.API_TOKEN)
-
 filename = './webhookPayloads.txt'
 if os.path.exists(filename):
     append_write = 'a'  # append if already exists
