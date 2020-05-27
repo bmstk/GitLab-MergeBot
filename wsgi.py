@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    if (message.chat.username == None) and (db.token.count_documents({"id": message.chat.id}) == 0):
+    if (message.chat.username is None) and (db.token.count_documents({"id": message.chat.id}) == 0):
         inline_item2 = types.InlineKeyboardButton('Создание Username', url='https://telegram-rus.ru/nik')
         inline_bt2 = types.InlineKeyboardMarkup()
         inline_bt2.add(inline_item2)
@@ -48,32 +48,35 @@ def send_welcome(message):
 Нажав на кнопку, ты узнаешь, как создать никнейм. Но если тебя все устраивает, я не настаиваю, моей работе это не помешает 🤔",
                          parse_mode="html", reply_markup=inline_bt2)
 
-    if message.chat.username == None:
-        NameUser = str(message.chat.id)
+    if message.chat.username is None:
+        name_user = str(message.chat.id)
     else:
-        NameUser = "@" + message.chat.username
+        name_user = "@" + message.chat.username
 
     st = open('qaz/privet.webp', 'rb')
     bot.send_sticker(message.chat.id, st)
 
     if 5 <= timer[3] < 11:
         bot.send_message(message.chat.id,
-                         "Доброе утро , " + NameUser + "! Какая же ты ранняя пташка, а я ведь мог и спать в это время 😅",
+                         "Доброе утро , " + name_user +
+                         "! Какая же ты ранняя пташка, а я ведь мог и спать в это время 😅",
                          parse_mode="html")
 
     if 11 <= timer[3] < 17:
         bot.send_message(message.chat.id,
-                         "Добрый день, " + NameUser + "! Как же ты вовремя я только вернулся с обеденного перекуса 🥘 А ты покушал?",
+                         "Добрый день, " + name_user +
+                         "! Как же ты вовремя я только вернулся с обеденного перекуса 🥘 А ты покушал?",
                          parse_mode="html")
 
     if 17 <= timer[3] < 23:
         bot.send_message(message.chat.id,
-                         "Добрый вечер, " + NameUser + "! Ого уже вечер, ты домой то не собираешься? 🌅",
+                         "Добрый вечер, " + name_user + "! Ого уже вечер, ты домой то не собираешься? 🌅",
                          parse_mode="html")
 
     if (timer[3] == 23) or (0 <= timer[3] < 5):
         bot.send_message(message.chat.id,
-                         "Доброй ночи... добрая ночь... в общем, привет, " + NameUser + "! Ты чего не спишь, давай не засиживайся, спать - полезно 😴",
+                         "Доброй ночи... добрая ночь... в общем, привет, " + name_user +
+                         "! Ты чего не спишь, давай не засиживайся, спать - полезно 😴",
                          parse_mode="html")
 
     if db.token.count_documents({"id": message.chat.id}) == 1:
@@ -83,9 +86,9 @@ def send_welcome(message):
         for j in cursor1['token']:
             cur.append(j)
             cur.append('\n')
-        stroka = ' '.join(cur)
+        token_string = ' '.join(cur)
 
-        bot.send_message(message.chat.id, "По твоему id в базе данных я нашел следующие TOKEN: " + stroka,
+        bot.send_message(message.chat.id, "По твоему id в базе данных я нашел следующие TOKEN: " + token_string,
                          parse_mode="html")
 
         item1 = types.KeyboardButton("Ввод TOKEN")
@@ -98,8 +101,10 @@ def send_welcome(message):
         bot.register_next_step_handler(message, process_step_1)
 
     elif db.token.count_documents({"id": message.chat.id}) > 1:
-        bot.send_message(message.chat.id, "По твоему id в базе данных я нашел больше одного упоминания! Это ненормально, но твоей вины здесь нет.\
-Напиши /problem и опиши этот случай(можешь перекопировать текст моего сообщения). Извини за неудобства 😬",
+        bot.send_message(message.chat.id, "По твоему id в базе данных я нашел больше одного упоминания! "
+                                          "Это ненормально, но твоей вины здесь нет. "
+                                          "Напиши /problem и опиши этот случай "
+                                          "(можешь перекопировать текст моего сообщения). Извини за неудобства 😬",
                          parse_mode="html")
 
     elif db.token.count_documents({"id": message.chat.id}) == 0:
@@ -113,7 +118,7 @@ def send_welcome(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add(item1)
 
-        bot.send_message(message.chat.id, NameUser + ", ты у нас впервые, твой id был удачно записан в базу данных.",
+        bot.send_message(message.chat.id, name_user + ", ты у нас впервые, твой id был удачно записан в базу данных.",
                          parse_mode="html", reply_markup=markup)
 
         bot.send_message(message.chat.id,
@@ -152,20 +157,20 @@ def send_problem(message):
 
     bot.send_message(message.chat.id, "Ты уверен??? Если ты нашел ошибку... прости нас 😥", parse_mode="html")
 
-    bot.send_message(message.chat.id, "Кратко опиши проблему, мы постараемся ее исправить в скором времени 😬\n", \
+    bot.send_message(message.chat.id, "Кратко опиши проблему, мы постараемся ее исправить в скором времени 😬\n",
                      parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
 
     bot.register_next_step_handler(message, process_step_3)
 
 
 def process_step_3(message):
-    if message.chat.username == None:
-        NameUser = str(message.chat.id)
+    if message.chat.username is None:
+        name_user = str(message.chat.id)
     else:
-        NameUser = "@" + message.chat.username
+        name_user = "@" + message.chat.username
 
     bot.send_message('538587223',
-                     "Имя пользователя, оставившего комментарий: " + NameUser + "\nКомментарий: " + message.text,
+                     "Имя пользователя, оставившего комментарий: " + name_user + "\nКомментарий: " + message.text,
                      parse_mode="html")
 
 
