@@ -130,6 +130,7 @@ def process_step_2(message):
     cursor3 = db.token.find_one({"id": message.chat.id})
     cur = []
     cursor4 = dict(cursor3)
+    print(cursor4)
     for j in cursor4["token"]:
         cur.append(j)
     cur.append(message.text)
