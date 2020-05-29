@@ -140,7 +140,7 @@ def process_step_2(message):
         gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=' '.join(cur))
         gl.auth()
         username = gl.user.username
-        db.token.find_one_and_update({"id": message.chat.id}, {'$set': {"token": cur}})
+        db.token.find_one_and_update({"id": message.chat.id}, {'$set': {"token": cur, "idGitLab": username}})
 
         bot.send_message(message.chat.id,
                          "Ваш TOKEN был успешно добавлен в нашу базу данных 🎉",
