@@ -6,6 +6,8 @@ from telebot import types
 from bot import WebhookServer, config
 from bot.merger_bot import db, timer, bot
 
+from gitlab import Gitlab
+
 app = cherrypy.tree.mount(WebhookServer(), '/')
 
 if __name__ == '__main__':
@@ -131,6 +133,10 @@ def process_step_2(message):
     for j in cursor4["token"]:
         cur.append(j)
     cur.append(message.text)
+
+    gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=' '.join(cur))
+    gl.auth()
+    username = gl.user.username
 
     db.token.find_one_and_update({"id": message.chat.id}, {'$set': {"token": cur}})
 
