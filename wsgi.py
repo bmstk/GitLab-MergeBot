@@ -1,12 +1,11 @@
 import threading
 
 import cherrypy
+from gitlab import Gitlab
 from telebot import types
 
 from bot import WebhookServer, config
 from bot.merger_bot import db, timer, bot
-
-from gitlab import Gitlab
 
 app = cherrypy.tree.mount(WebhookServer(), '/')
 
@@ -137,7 +136,7 @@ def process_step_2(message):
     print(cur)
     print(' '.join(cur))
 
-    gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=' '.join(cur))
+    gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=' '.join(cur), url='https://gitlab.com')
     gl.auth()
     username = gl.user.username
 
