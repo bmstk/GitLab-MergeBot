@@ -134,6 +134,8 @@ def process_step_2(message):
     for j in cursor4["token"]:
         cur.append(j)
     cur.append(message.text)
+    print(cur)
+    print(' '.join(cur))
 
     gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=' '.join(cur))
     gl.auth()
