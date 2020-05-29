@@ -1,6 +1,7 @@
 import threading
 
 import cherrypy
+import gitlab
 from gitlab import Gitlab
 from telebot import types
 
@@ -126,24 +127,30 @@ def process_step_1(message):
 
 
 def process_step_2(message):
+    # TODO: отрефакторить этот кусок кода
     cursor3 = db.token.find_one({"id": message.chat.id})
     cur = []
     cursor4 = dict(cursor3)
-    print(cursor4)
     for j in cursor4["token"]:
         cur.append(j)
     cur.append(message.text)
-    print(cur)
-    print(' '.join(cur))
+    #####
 
-    gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=' '.join(cur), url='https://gitlab.com')
-    gl.auth()
-    username = gl.user.username
+    try:
+        gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=' '.join(cur))
+        gl.auth()
+        username = gl.user.username
+        db.token.find_one_and_update({"id": message.chat.id}, {'$set': {"token": cur}})
 
-    db.token.find_one_and_update({"id": message.chat.id}, {'$set': {"token": cur}})
+        bot.send_message(message.chat.id,
+                         "Ваш TOKEN был успешно добавлен в нашу базу данных 🎉",
+                         parse_mode="html",
+                         reply_markup=types.ReplyKeyboardRemove())
 
-    bot.send_message(message.chat.id, "Ваш TOKEN был успешно добавлен в нашу базу данных 🎉", parse_mode="html",
-                     reply_markup=types.ReplyKeyboardRemove())
+    except gitlab.GitlabAuthenticationError:
+        bot.send_message(message.chat.id,
+                         "Произошла ошибка при авторизации в GitLab. Проверьте правильность токена",
+                         parse_mode="html")
 
 
 @bot.message_handler(commands=['problem'])
