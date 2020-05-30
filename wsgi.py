@@ -43,7 +43,7 @@ def send_welcome(message):
     else:
         name_user = "@" + message.chat.username
 
-    st = open('qaz/privet.webp', 'rb')
+    st = open('static/privet.webp', 'rb')
     bot.send_sticker(message.chat.id, st)
 
     if 5 <= timer[3] < 11:
@@ -155,7 +155,7 @@ def process_step_2(message):
 
 @bot.message_handler(commands=['problem'])
 def send_problem(message):
-    st2 = open('qaz/problem.webp', 'rb')
+    st2 = open('static/problem.webp', 'rb')
     bot.send_sticker(message.chat.id, st2)
 
     bot.send_message(message.chat.id, "Ты уверен??? Если ты нашел ошибку... прости нас 😥", parse_mode="html")
