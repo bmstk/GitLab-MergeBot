@@ -13,3 +13,6 @@ telegram_token = data['telegram_token']
 bot = telebot.TeleBot(telegram_token)
 client = MongoClient(data['mongodb_url'])
 db = client.mergebot
+
+webhook_host = data['webhook_host']
+webhook_port = data['webhook_port']
