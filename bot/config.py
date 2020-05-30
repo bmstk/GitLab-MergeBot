@@ -1,8 +1,7 @@
 from bot import merger_bot
 
-WEBHOOK_HOST = '64.227.126.203'
-WEBHOOK_PORT = 443  # 443, 80, 88 или 8443 (порт должен быть открыт!)
-WEBHOOK_LISTEN = '0.0.0.0'  # На некоторых серверах придется указывать такой же IP, что и выше
+WEBHOOK_HOST = merger_bot.webhook_host
+WEBHOOK_PORT = merger_bot.webhook_port
 
 WEBHOOK_SSL_CERT = './SSL/webhook_cert.pem'  # Путь к сертификату
 WEBHOOK_SSL_PRIV = './SSL/webhook_pkey.pem'  # Путь к приватному ключу
