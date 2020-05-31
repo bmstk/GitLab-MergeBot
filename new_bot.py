@@ -34,8 +34,8 @@ def send_welcome(message):
     else:
         name_user = "@" + message.chat.username
 
-    #st = open('static/privet.webp', 'rb')
-    #bot.send_sticker(message.chat.id, st)
+    st = open('static/privet.webp', 'rb')
+    bot.send_sticker(message.chat.id, st)
 
     if 5 <= timer[3] < 11:
         bot.send_message(message.chat.id,
