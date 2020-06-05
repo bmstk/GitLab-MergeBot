@@ -82,10 +82,14 @@ def send_welcome(message):
                          parse_mode="html")
 
         item1 = types.KeyboardButton("Ввод TOKEN")
+        item2 = types.KeyboardButton("Выбор TOKEN")  # TODO: в идеале реализовать поддержку нескольких токенов
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add(item1)
+        markup.add(item2)
 
-        bot.send_message(message.chat.id, "Хочешь добавить TOKEN - жми на кнопочку ", parse_mode="html",
+        bot.send_message(message.chat.id,
+                         "Хочешь добавить TOKEN или выбрать один из уже имеющихся - жми на соответствующие кнопочки ",
+                         parse_mode="html",
                          reply_markup=markup)
 
         bot.register_next_step_handler(message, process_step_1)
@@ -98,7 +102,8 @@ def send_welcome(message):
                          parse_mode="html")
 
     elif db.token.count_documents({"id": message.chat.id}) == 0:
-        db.token.insert_one({"id": message.chat.id, "token": []})
+        db.token.insert_one({"id": message.chat.id, "token": [],
+                             'idGitLab': []})  # TODO: Изменить idGitLab на словарь "сервис" : "токен"
 
         inline_item1 = types.InlineKeyboardButton('Как получить TOKEN', url='https://git.iu7.bmstu.ru/')
         inline_bt1 = types.InlineKeyboardMarkup()
@@ -121,35 +126,70 @@ def send_welcome(message):
 def process_step_1(message):
     if message.text == 'Ввод TOKEN':
         bot.register_next_step_handler(message, process_step_2)
+    elif message.text == 'Выбор TOKEN':
+        cursor3 = db.token.find_one({"id": message.chat.id})
+        cur = []
+        cursor4 = dict(cursor3)
+        for j in cursor4["token"]:
+            cur.append(j)
+
+        bot.send_message(message.chat.id,
+                         "Давай выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN: " + '\n'.join(cur),
+                         parse_mode="html")
+
+        bot.register_next_step_handler(message, process_step_4)
     else:
         bot.send_message(message.chat.id, 'Странно, такой команды нет...', parse_mode="html",
                          reply_markup=types.ReplyKeyboardRemove())
 
 
 def process_step_2(message):
-    # TODO: отрефакторить этот кусок кода
     cursor3 = db.token.find_one({"id": message.chat.id})
     cur = []
     cursor4 = dict(cursor3)
     for j in cursor4["token"]:
         cur.append(j)
-    cur.append(message.text)
-    #####
 
-    try:
-        gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=' '.join(cur))
-        gl.auth()
-        username = gl.user.username
-        db.token.find_one_and_update({"id": message.chat.id}, {'$set': {"token": cur, "idGitLab": username}})
+    if message.text in cur:
+        bot.send_message(message.chat.id, "Данный TOKEN уже есть в нашей базе данных", parse_mode="html",
+                         reply_markup=types.ReplyKeyboardRemove())
 
+        bot.send_message(message.chat.id,
+                         "Давай тогда выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN: " + '\n'.join(
+                             cur), parse_mode="html")
+
+        bot.register_next_step_handler(message, process_step_4)
+    else:
+        cur.append(message.text)
+        db.token.find_one_and_update({"id": message.chat.id}, {'$set': {"token": cur}})
         bot.send_message(message.chat.id,
                          "Ваш TOKEN был успешно добавлен в нашу базу данных 🎉",
                          parse_mode="html",
                          reply_markup=types.ReplyKeyboardRemove())
 
-    except gitlab.GitlabAuthenticationError:
+
+def process_step_4(message):
+    cursor3 = db.token.find_one({"id": message.chat.id})
+    cur = []
+    cursor4 = dict(cursor3)
+    for j in cursor4["token"]:
+        cur.append(j)
+
+    if message.text in cur:
+        try:
+            gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=message.text)
+            gl.auth()
+            username = gl.user.username
+            db.token.find_one_and_update({"id": message.chat.id, "token": message.text},
+                                         {'$set': {"idGitLab": username}})
+
+        except gitlab.GitlabAuthenticationError:
+            bot.send_message(message.chat.id,
+                             "Произошла ошибка при авторизации в GitLab. Проверьте правильность токена",
+                             parse_mode="html")
+    else:
         bot.send_message(message.chat.id,
-                         "Произошла ошибка при авторизации в GitLab. Проверьте правильность токена",
+                         "Такого TOKEN нет в твоем списке...",
                          parse_mode="html")
 
 
