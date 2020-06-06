@@ -26,7 +26,10 @@ class WebhookServer(object):
 
             for i in assignees_array:  # для каждого пользователя
                 print(i['username'])
+                print(i['username'])
                 private_key = db.token.find_one({'idGitLab': i['username']})  # достаем ключ авторизации пользователя
+                print(private_key)
+
                 # авторизуемся для каждого юзера по последнему токену TODO: оставить только один возможный токен
                 print("Все токены юзера: " + private_key)
                 gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key)  # ['token'][-1]
