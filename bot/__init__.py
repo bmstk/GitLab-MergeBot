@@ -28,8 +28,8 @@ class WebhookServer(object):
                 print(i['username'])
                 private_key = db.token.find_one({'idGitLab': i['username']})  # достаем ключ авторизации пользователя
                 # авторизуемся для каждого юзера по последнему токену TODO: оставить только один возможный токен
-                print("Все токены юзера: " + " ".join(private_key))
-                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][-1])
+                print("Все токены юзера: " + private_key)
+                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key)  # ['token'][-1]
                 project = gl.projects.get(raw_json['project']['id'])  # находим проект
 
                 # print(project.mergerequests.list(state='merged', order_by='updated_at'),
