@@ -33,7 +33,7 @@ class WebhookServer(object):
                 print("Все токены юзера: " + private_key['token'][-1])
                 gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][-1])  # ['token'][-1]
                 project = gl.projects.get(project_id)  # находим проект
-                result = project.repository_compare(target_branch, source_branch)
+                result = gl.projects.get(project_id).project.repository_compare(target_branch, source_branch)
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     # TODO: Генерить сообщение с инлайн кнопками. Пример лежит в беседе
