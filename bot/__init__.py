@@ -41,6 +41,6 @@ class WebhookServer(object):
                         message = "Пользователь {0} отправил Вам " \
                                   "запрос на слитие веток {1} и {2} в проекте {3}" \
                                   "\n".format(author_name, target_branch, source_branch, project_name) \
-                                  + "```" + diff + "```"
+                                  + "```" + diff + "```\n Ниже ссылка на мерж реквест."
                         bot.send_message(chat_id=receiver['id'], text=message, parse_mode="markdown")
                         # TODO: тут еще кнопочка нужна со ссылкой на мерж (см merge_request_url)
