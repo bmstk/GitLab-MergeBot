@@ -38,5 +38,8 @@ class WebhookServer(object):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     # TODO: Генерить сообщение с инлайн кнопками. Пример лежит в беседе
                     for file in result['diffs']:
-                        message = "Пользователь {0} отправил Вам: \n".format(author_name) + file['diff']
+                        message = "Пользователь {0} отправил Вам " \
+                                  "запрос на слитие веток {1} и {2} в проекте {3}\n".format(author_name, target_branch,
+                                                                                            source_branch,
+                                                                                            project_name) + file['diff']
                         bot.send_message(chat_id=receiver['id'], text=message)
