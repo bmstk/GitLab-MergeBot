@@ -12,7 +12,9 @@ if os.path.exists(filename):
 else:
     append_write = 'w'  # make a new file if not
 
-
+"""
+Класс сервера, обеспечивающего работу бэкэнда
+"""
 class WebhookServer(object):
     @cherrypy.expose
     @cherrypy.tools.json_in()
