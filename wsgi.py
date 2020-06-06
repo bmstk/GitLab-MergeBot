@@ -8,7 +8,7 @@ from telebot import types
 from bot import WebhookServer, config
 from bot.merger_bot import db, timer, bot
 
-app = cherrypy.tree.mount(WebhookServer(), '/')
+cherrypy.tree.mount(WebhookServer(), '/')
 
 if __name__ == '__main__':
     # конфигурация сервера
