@@ -32,7 +32,7 @@ class WebhookServer(object):
 
                 # авторизуемся для каждого юзера по последнему токену TODO: оставить только один возможный токен
                 print("Все токены юзера: " + private_key['token'][-1])
-                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key)  # ['token'][-1]
+                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][-1])  # ['token'][-1]
                 project = gl.projects.get(raw_json['project']['id'])  # находим проект
                 result = project.repository_compare(target_branch, source_branch)
                 diffs = []
