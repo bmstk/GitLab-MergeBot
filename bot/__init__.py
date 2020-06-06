@@ -34,10 +34,6 @@ class WebhookServer(object):
                 print("Все токены юзера: " + private_key)
                 gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key)  # ['token'][-1]
                 project = gl.projects.get(raw_json['project']['id'])  # находим проект
-
-                # print(project.mergerequests.list(state='merged', order_by='updated_at'),
-                #       raw_json['object_attributes']['iid'] + '\n')
-
                 result = project.repository_compare(target_branch, source_branch)
                 diffs = []
                 for diff in result['diffs']:
