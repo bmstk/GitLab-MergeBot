@@ -37,10 +37,11 @@ class WebhookServer(object):
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     for file in result['diffs']:
-                        diff = str(file['diff']).replace("```", "").replace("_", "\_")
+                        diff = "```" + str(file['diff']) + "```"
                         message = "Пользователь {0} отправил Вам " \
-                                  "запрос на слитие веток {1} и {2} в проекте {3}" \
-                                  "\n".format(author_name, target_branch, source_branch, project_name) \
-                                  + "```" + diff + "```\n Ниже ссылка на мерж реквест."
-                        bot.send_message(chat_id=receiver['id'], text=message, parse_mode="markdown")
+                                  "запрос на слитие веток {1} и {2} " \
+                                  "в проекте {3}\n".format(author_name, target_branch,
+                                                           source_branch,
+                                                           project_name).replace("_", "\_")
+                        bot.send_message(chat_id=receiver['id'], text=message + diff, parse_mode="markdown")
                         # TODO: тут еще кнопочка нужна со ссылкой на мерж (см merge_request_url)
