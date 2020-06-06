@@ -38,3 +38,5 @@ class WebhookServer(object):
                     print(receiver)
                     bot.send_message(chat_id=receiver['id'],
                                      text=("Hello! A new merge request is waiting you! \n" + mr.diffs.list()))
+                    # шлем юзеру гит див
+
