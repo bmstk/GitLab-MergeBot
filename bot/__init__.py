@@ -26,7 +26,6 @@ class WebhookServer(object):
 
             for i in assignees_array:  # для каждого пользователя
                 print(i['username'])
-                print(i['username'])
                 private_key = db.token.find_one({'idGitLab': i['username']})  # достаем ключ авторизации пользователя
                 print(private_key)
 
