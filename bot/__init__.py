@@ -28,6 +28,8 @@ class WebhookServer(object):
                 # авторизуемся для каждого юзера по последнему токену TODO: оставить только один возможный токен
                 gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][-1])
                 project = gl.projects.get(raw_json['project']['id'])  # находим проект
+                source_branch = raw_json['object_attributes']['source_branch']
+                target_branch = raw_json['object_attributes']['target_branch']
                 print(project.mergerequests.list(state='merged', order_by='updated_at'),
                       raw_json['object_attributes']['iid'])
                 mr = project.mergerequests.get(raw_json['object_attributes']['iid'])  # находим МР
@@ -35,5 +37,6 @@ class WebhookServer(object):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     print(receiver)
                     bot.send_message(chat_id=receiver['id'],
-                                     text=("Hello! A new merge request is waiting you! \n" + "\n".join(mr.changes())))
+                                     text=("Hello! A new merge request is waiting you! \n" +
+                                           "\n".join(project.repository_compare(target_branch, source_branch))))
                     # шлем юзеру гит див
