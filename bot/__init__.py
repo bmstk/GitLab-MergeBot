@@ -19,7 +19,7 @@ class WebhookServer(object):
     def index(self):
         # f = open(filename, append_write)
         # raw_body = cherrypy.request.body.read()
-        raw_json = cherrypy.request.json
+        raw_json = cherrypy.request.json  # получаем вебхук
         # str_obj = json.dumps(raw_json)
         # f.write(str_obj + '\n')
         # f.close()
