@@ -28,11 +28,11 @@ class WebhookServer(object):
             assignees_array = raw_json['assignees']  # находим всем юзеров, заасаненных к мержреквесту
             for i in assignees_array:  # для каждого пользователя
                 print(i['username'])
+                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', db.token.find_one({'token'})) # авторизуемся для каждого юзера
+                project = gl.projects.get(raw_json['project']['id'])
+                mr = project.mergerequests.get(raw_json['object_attributes']['assignee_id'])
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     print(receiver)
-                    gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', db.token.find_one({'token'}))
-                    project = gl.projects.get(raw_json['project']['id'])
-                    mr = project.mergerequests.get(raw_json['object_attributes']['assignee_id'])
                     bot.send_message(chat_id=receiver['id'],
                                      text=("Hello! A new merge request is waiting you! \n" + mr.diffs.list()))
