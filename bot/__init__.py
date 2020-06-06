@@ -30,7 +30,7 @@ class WebhookServer(object):
                 print(i['username'])
                 private_key = db.token.find_one({'idGitLab': i['username']})
                 # авторизуемся для каждого юзера
-                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][0])
+                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][-1])
                 project = gl.projects.get(raw_json['project']['id'])  # находим проект
                 mr = project.mergerequests.get(raw_json['object_attributes']['assignee_id'])  # находим МР
                 for receiver in db.token.find({'idGitLab': i['username']}):
