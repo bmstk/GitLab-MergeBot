@@ -35,7 +35,7 @@ class WebhookServer(object):
                 project = gl.projects.get(project_id)  # находим проект
                 result = project.repository_compare(target_branch, source_branch)
                 diffs = []
-                print(result['changes'])
+                print(result['commits'])
                 #for change in result['diffs']:
 
                     # print(diff['diff'])
@@ -45,6 +45,6 @@ class WebhookServer(object):
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     # TODO: Генерить сообщение с инлайн кнопками. Пример лежит в беседе
-                    print(result['changes'])
+                    print(result['commits'])
                     #message = result['diffs']['diff']
                     # bot.send_message(chat_id=receiver['id'], text=)  # шлем юзеру гит див
