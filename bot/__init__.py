@@ -34,7 +34,5 @@ class WebhookServer(object):
                     for diff in result['diffs']:
                         diffs.append(diff)
 
-                    bot.send_message(chat_id=receiver['id'],
-                                     text=("Hello! A new merge request is waiting you! \n" +
-                                           "\n".join(diffs)))
+                    bot.send_message(chat_id=receiver['id'], text=diffs)
                     # шлем юзеру гит див
