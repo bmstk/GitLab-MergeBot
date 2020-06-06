@@ -19,12 +19,8 @@ class WebhookServer(object):
     @cherrypy.expose
     @cherrypy.tools.json_in()
     def index(self):
-        # f = open(filename, append_write)
         # raw_body = cherrypy.request.body.read()
         raw_json = cherrypy.request.json  # получаем вебхук
-        # str_obj = json.dumps(raw_json)
-        # f.write(str_obj + '\n')
-        # f.close()
         if raw_json['object_kind'] == 'merge_request':  # если вебхук вызван мержреквестом
             print(raw_json)
             assignees_array = raw_json['assignees']  # находим всем юзеров, заасаненных к мержреквесту
