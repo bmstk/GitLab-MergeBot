@@ -32,6 +32,7 @@ class WebhookServer(object):
 
                     diffs = []
                     for diff in result['diffs']:
+                        print(diff)
                         diffs.append(diff)
 
                     bot.send_message(chat_id=receiver['id'], text=diffs)
