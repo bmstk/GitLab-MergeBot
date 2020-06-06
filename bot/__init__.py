@@ -36,7 +36,6 @@ class WebhookServer(object):
                 result = project.repository_compare(target_branch, source_branch)
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
-                    # TODO: Генерить сообщение с инлайн кнопками. Пример лежит в беседе
                     for file in result['diffs']:
                         message = "Пользователь {0} отправил Вам " \
                                   "запрос на слитие веток {1} и {2} в проекте {3}" \
