@@ -12,7 +12,7 @@ class WebhookServer(object):
         # raw_body = cherrypy.request.body.read()
         raw_json = cherrypy.request.json  # получаем вебхук
         if raw_json['object_kind'] == 'merge_request':  # если вебхук вызван мержреквестом
-            print(raw_json + "\n")
+            print(raw_json)
 
             assignees_array = raw_json['assignees']  # находим всем юзеров, заасаненных к мержреквесту
             project_name = raw_json['project']['name']  # название проекта
