@@ -24,7 +24,7 @@ class WebhookServer(object):
                 target_branch = raw_json['object_attributes']['target_branch']
                 print(project.mergerequests.list(state='merged', order_by='updated_at'),
                       raw_json['object_attributes']['iid'])
-                mr = project.mergerequests.get(raw_json['object_attributes']['iid'])  # находим МР
+                #mr = project.mergerequests.get(raw_json['object_attributes']['iid'])  # находим МР
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     print(receiver)
