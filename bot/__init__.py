@@ -6,12 +6,6 @@ import gitlab
 from bot import config
 from bot.merger_bot import bot, db
 
-filename = './webhookPayloads.txt'
-if os.path.exists(filename):
-    append_write = 'a'  # append if already exists
-else:
-    append_write = 'w'  # make a new file if not
-
 
 class WebhookServer(object):
     @cherrypy.expose
