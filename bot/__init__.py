@@ -14,6 +14,7 @@ class WebhookServer(object):
         if raw_json['object_kind'] == 'merge_request':  # если вебхук вызван мержреквестом
             print(raw_json)
 
+            # Парсинг вебхука ########################################################################
             assignees_array = raw_json['assignees']  # находим всем юзеров, заасаненных к мержреквесту
             project_name = raw_json['project']['name']  # название проекта
             project_id = raw_json['project']['id']  # id проекта
@@ -21,6 +22,7 @@ class WebhookServer(object):
             target_branch = raw_json['object_attributes']['target_branch']  # ветка, в которую сливаем
             author_name = raw_json['user']['name']  # имя автора merge request
             merge_request_url = raw_json['object_attributes']['url']  # адрес страницы merge request
+            ##########################################################################################
 
             for i in assignees_array:  # для каждого пользователя
                 print(i['username'])
@@ -43,5 +45,6 @@ class WebhookServer(object):
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     print(receiver + '\n')
-                    bot.send_message(chat_id=receiver['id'], text="\n\n".join(diffs) + "Автор: " + author_name + ". Проект: " + project_name)
+                    bot.send_message(chat_id=receiver['id'],
+                                     text="\n\n".join(diffs) + "Автор: " + author_name + ". Проект: " + project_name)
                     # шлем юзеру гит див
