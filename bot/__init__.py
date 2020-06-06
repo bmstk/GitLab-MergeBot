@@ -12,9 +12,7 @@ if os.path.exists(filename):
 else:
     append_write = 'w'  # make a new file if not
 
-"""
-Класс сервера, обеспечивающего работу бэкэнда
-"""
+
 class WebhookServer(object):
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -26,11 +24,12 @@ class WebhookServer(object):
             assignees_array = raw_json['assignees']  # находим всем юзеров, заасаненных к мержреквесту
             for i in assignees_array:  # для каждого пользователя
                 print(i['username'])
-                private_key = db.token.find_one({'idGitLab': i['username']}) # достаем ключ авторизации пользователя
+                private_key = db.token.find_one({'idGitLab': i['username']})  # достаем ключ авторизации пользователя
                 # авторизуемся для каждого юзера по последнему токену TODO: оставить только один возможный токен
                 gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][-1])
                 project = gl.projects.get(raw_json['project']['id'])  # находим проект
-                print(project.mergerequests.list(state='merged', order_by='updated_at'), raw_json['object_attributes']['iid'])
+                print(project.mergerequests.list(state='merged', order_by='updated_at'),
+                      raw_json['object_attributes']['iid'])
                 mr = project.mergerequests.get(raw_json['object_attributes']['iid'])  # находим МР
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
@@ -38,4 +37,3 @@ class WebhookServer(object):
                     bot.send_message(chat_id=receiver['id'],
                                      text=("Hello! A new merge request is waiting you! \n" + "\n".join(mr.changes())))
                     # шлем юзеру гит див
-
