@@ -43,3 +43,4 @@ class WebhookServer(object):
                                   "\n".format(author_name, target_branch, source_branch, project_name) \
                                   + "```" + diff + "```"
                         bot.send_message(chat_id=receiver['id'], text=message)
+                        # TODO: тут еще кнопочка нужна
