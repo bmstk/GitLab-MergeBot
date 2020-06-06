@@ -36,7 +36,7 @@ class WebhookServer(object):
                 result = project.repository_compare(target_branch, source_branch)
                 diffs = []
                 for diff in result['diffs']:
-                    #print(diff['diff'])
+                    # print(diff['diff'])
                     diffs.append(diff['diff'])
                 # mr = project.mergerequests.get(raw_json['object_attributes']['iid'])  # находим МР
 
