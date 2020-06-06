@@ -40,4 +40,4 @@ class WebhookServer(object):
                     for file in result['diffs']:
                         message = file['diff']
                         bot.send_message(chat_id=receiver['id'],
-                                         text="Пользователь {} отправил Вам: \n".format(author_name) + message)
+                                         text=("Пользователь %s отправил Вам: \n" % (author_name)) + message)
