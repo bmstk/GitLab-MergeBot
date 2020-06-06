@@ -22,6 +22,7 @@ class WebhookServer(object):
         # str_obj = json.dumps(raw_json)
         # f.write(str_obj + '\n')
         # f.close()
+        print(raw_json)
         assignees_array = raw_json['assignees']
         username_array = []
         for i in assignees_array:
