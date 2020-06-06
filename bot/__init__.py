@@ -22,12 +22,13 @@ class WebhookServer(object):
         # str_obj = json.dumps(raw_json)
         # f.write(str_obj + '\n')
         # f.close()
-        print(raw_json)
-        assignees_array = raw_json['assignees']
-        username_array = []
-        for i in assignees_array:
-            username_array.append(i['username'])
-            print(i['username'])
-            for receiver in db.token.find({'idGitLab': i['username']}):
-                print(receiver)
-                bot.send_message(chat_id=receiver['id'], text="Hello! A new merge request is waiting you!")
+        if raw_json['object_kind'] == 'merge_request':
+            print(raw_json)
+            assignees_array = raw_json['assignees']
+            username_array = []
+            for i in assignees_array:
+                username_array.append(i['username'])
+                print(i['username'])
+                for receiver in db.token.find({'idGitLab': i['username']}):
+                    print(receiver)
+                    bot.send_message(chat_id=receiver['id'], text="Hello! A new merge request is waiting you!")
