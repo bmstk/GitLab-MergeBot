@@ -1,5 +1,3 @@
-import os
-
 import cherrypy
 import gitlab
 
@@ -30,7 +28,13 @@ class WebhookServer(object):
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     print(receiver)
+                    result = project.repository_compare(target_branch, source_branch)
+
+                    diffs = []
+                    for diff in result['diffs']:
+                        diffs.append(diff)
+
                     bot.send_message(chat_id=receiver['id'],
                                      text=("Hello! A new merge request is waiting you! \n" +
-                                           "\n".join(project.repository_compare(target_branch, source_branch))))
+                                           "\n".join(diffs)))
                     # шлем юзеру гит див
