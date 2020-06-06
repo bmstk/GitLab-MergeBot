@@ -39,4 +39,5 @@ class WebhookServer(object):
                     # TODO: Генерить сообщение с инлайн кнопками. Пример лежит в беседе
                     for file in result['diffs']:
                         message = file['diff']
-                        bot.send_message(chat_id=receiver['id'], text="Пользователь {} отправил Вам: \n" + message)  # шлем юзеру гит див
+                        bot.send_message(chat_id=receiver['id'],
+                                         text="Пользователь {} отправил Вам: \n".format(author_name) + message)
