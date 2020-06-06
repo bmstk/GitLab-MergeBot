@@ -34,7 +34,7 @@ class WebhookServer(object):
                 gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][-1])  # ['token'][-1]
                 project = gl.projects.get(project_id)  # находим проект
                 result = project.repository_compare(target_branch, source_branch)
-                diffs = []
+                # diffs = []
                 print(result['commits'])
                 #for change in result['diffs']:
 
