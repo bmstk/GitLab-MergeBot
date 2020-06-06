@@ -3,7 +3,7 @@ import os
 import cherrypy
 
 from bot import config
-from bot.merger_bot import bot
+from bot.merger_bot import bot, db
 
 filename = './webhookPayloads.txt'
 if os.path.exists(filename):
@@ -26,6 +26,7 @@ class WebhookServer(object):
         username_array = []
         for i in assignees_array:
             username_array.append(i['username'])
-        user_name = " ".join(username_array)
-        bot.send_message(chat_id=87763438, text=user_name)
-        return ''
+            print(i['username'])
+            for receiver in db.token.find({'idGitLab': i['username']}):
+                print(receiver)
+                bot.send_message(chat_id=receiver['id'], text="Hello! A new merge request is waiting you!")
