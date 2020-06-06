@@ -23,17 +23,17 @@ class WebhookServer(object):
                 source_branch = raw_json['object_attributes']['source_branch']
                 target_branch = raw_json['object_attributes']['target_branch']
                 print(project.mergerequests.list(state='merged', order_by='updated_at'),
-                      raw_json['object_attributes']['iid'])
-                #mr = project.mergerequests.get(raw_json['object_attributes']['iid'])  # находим МР
+                      raw_json['object_attributes']['iid'] + '\n')
+
+                result = project.repository_compare(target_branch, source_branch)
+                diffs = []
+                for diff in result['diffs']:
+                    print(diff['diff'])
+                    diffs.append(diff['diff'])
+                # mr = project.mergerequests.get(raw_json['object_attributes']['iid'])  # находим МР
+
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
-                    print(receiver)
-                    result = project.repository_compare(target_branch, source_branch)
-
-                    diffs = []
-                    for diff in result['diffs']:
-                        print(diff)
-                        diffs.append(diff)
-
+                    print(receiver + '\n')
                     bot.send_message(chat_id=receiver['id'], text=diffs)
                     # шлем юзеру гит див
