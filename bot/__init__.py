@@ -26,5 +26,7 @@ class WebhookServer(object):
         username_array = []
         for i in assignees_array:
             username_array.append(i['username'])
+            print(i['username'])
             for receiver in db.token.find({'idGitLab': i['user_name']}):
+                print(receiver)
                 bot.send_message(chat_id=receiver['id'], text="Hello! A new merge request is waiting you!")
