@@ -45,6 +45,6 @@ class WebhookServer(object):
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     # TODO: Генерить сообщение с инлайн кнопками. Пример лежит в беседе
-                    # print(result['diffs'])
+                    print(result['changes'])
                     #message = result['diffs']['diff']
                     # bot.send_message(chat_id=receiver['id'], text=)  # шлем юзеру гит див
