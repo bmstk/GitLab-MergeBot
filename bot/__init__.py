@@ -28,7 +28,7 @@ class WebhookServer(object):
             assignees_array = raw_json['assignees']  # находим всем юзеров, заасаненных к мержреквесту
             for i in assignees_array:  # для каждого пользователя
                 print(i['username'])
-                private_key = db.token.find_one({'idGitLab': i['username']})
+                private_key = db.token.find_one({'idGitLab': i['username']}) # достаем ключ авторизации пользователя
                 # авторизуемся для каждого юзера по последнему токену TODO: оставить только один возможный токен
                 gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][-1])
                 project = gl.projects.get(raw_json['project']['id'])  # находим проект
