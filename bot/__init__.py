@@ -42,5 +42,5 @@ class WebhookServer(object):
                                   "запрос на слитие веток {1} и {2} в проекте {3}" \
                                   "\n".format(author_name, target_branch, source_branch, project_name) \
                                   + "```" + diff + "```"
-                        bot.send_message(chat_id=receiver['id'], text=message)
+                        bot.send_message(chat_id=receiver['id'], text=message, parse_mode="markdown")
                         # TODO: тут еще кнопочка нужна
