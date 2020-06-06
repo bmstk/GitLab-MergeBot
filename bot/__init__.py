@@ -36,9 +36,10 @@ class WebhookServer(object):
                 result = project.repository_compare(target_branch, source_branch)
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
+                    diff = str(file['diff']).replace("```", "")
                     for file in result['diffs']:
                         message = "Пользователь {0} отправил Вам " \
                                   "запрос на слитие веток {1} и {2} в проекте {3}" \
                                   "\n".format(author_name, target_branch, source_branch, project_name) \
-                                  + "```" + file['diff'] + "```"
+                                  + "```" + diff + "```"
                         bot.send_message(chat_id=receiver['id'], text=message)
