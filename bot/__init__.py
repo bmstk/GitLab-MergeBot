@@ -1,6 +1,7 @@
 import os
 
 import cherrypy
+from gitlab import *
 
 from bot import config
 from bot.merger_bot import bot, db
@@ -22,13 +23,16 @@ class WebhookServer(object):
         # str_obj = json.dumps(raw_json)
         # f.write(str_obj + '\n')
         # f.close()
-        if raw_json['object_kind'] == 'merge_request':
+        if raw_json['object_kind'] == 'merge_request':  # если вебхук вызван мержреквестом
             print(raw_json)
-            assignees_array = raw_json['assignees']
-            username_array = []
-            for i in assignees_array:
-                username_array.append(i['username'])
+            assignees_array = raw_json['assignees']  # находим всем юзеров, заасаненных к мержреквесту
+            for i in assignees_array:  # для каждого пользователя
                 print(i['username'])
                 for receiver in db.token.find({'idGitLab': i['username']}):
+                    # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     print(receiver)
-                    bot.send_message(chat_id=receiver['id'], text="Hello! A new merge request is waiting you!")
+                    gl = Gitlab('https://git.iu7.bmstu.ru/', db.token.find_one({'token'}))
+                    project = gl.projects.get(raw_json['project']['id'])
+                    mr = project.mergerequests.get(raw_json['object_attributes']['assignee_id'])
+                    bot.send_message(chat_id=receiver['id'],
+                                     text=("Hello! A new merge request is waiting you! \n" + mr.diffs.list()))
