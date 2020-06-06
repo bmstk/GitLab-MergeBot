@@ -1,7 +1,7 @@
 import os
 
 import cherrypy
-from gitlab import *
+import gitlab
 
 from bot import config
 from bot.merger_bot import bot, db
@@ -31,7 +31,7 @@ class WebhookServer(object):
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     print(receiver)
-                    gl = Gitlab('https://git.iu7.bmstu.ru/', db.token.find_one({'token'}))
+                    gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', db.token.find_one({'token'}))
                     project = gl.projects.get(raw_json['project']['id'])
                     mr = project.mergerequests.get(raw_json['object_attributes']['assignee_id'])
                     bot.send_message(chat_id=receiver['id'],
