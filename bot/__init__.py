@@ -40,6 +40,6 @@ class WebhookServer(object):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     print(receiver)
                     bot.send_message(chat_id=receiver['id'],
-                                     text=("Hello! A new merge request is waiting you! \n" + mr.diffs.list()))
+                                     text=("Hello! A new merge request is waiting you! \n" + "\n".join(mr.diffs.list())))
                     # шлем юзеру гит див
 
