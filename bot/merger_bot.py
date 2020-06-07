@@ -12,6 +12,7 @@ def encoder(key, clear):
     if type(clear) == list:
         for word in clear:
             enc = []
+            # TODO: выделить в отдельную функицю
             for index, item in enumerate(word):
                 key_c = key[index % len(key)]
                 enc_c = chr(ord(item) + ord(key_c) % 256)
