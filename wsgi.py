@@ -6,9 +6,7 @@ from gitlab import Gitlab
 from telebot import types
 
 from bot import WebhookServer, config
-from bot.merger_bot import db, timer, bot
-
-from base64 import b64encode, b64decode
+from bot.merger_bot import db, timer, bot, decoder, encoder
 
 cherrypy.tree.mount(WebhookServer(), '/')
 key = 'SL0gkn6fTXZOPIt@|sW@F7?oQO%zsKJy'
@@ -30,49 +28,20 @@ if __name__ == '__main__':
     bot_thread.start()
 
 
-def encoder(key, clear):
-    enc = []
-    enc1 = []
-    if type(clear) == list:
-        for slovo in clear:
-            enc = []
-            for index, item in enumerate(slovo):
-                key_c = key[index % len(key)]
-                enc_c = chr(ord(item) + ord(key_c) % 256)
-                enc.append(enc_c)
-            enc1.append(b64encode("".join(enc).encode()).decode())
-        return enc1
-    else:
-        for index, item in enumerate(clear):
-            key_c = key[index % len(key)]
-            enc_c = chr(ord(item) + ord(key_c) % 256)
-            enc.append(enc_c)
-
-        return b64encode("".join(enc).encode()).decode()
-
-
-def decoder(key, enc):
-    dec = []
-    enc = b64decode(enc).decode()
-    for index, item in enumerate(enc):
-        key_c = key[index % len(key)]
-        dec_c = chr((256 + ord(item) - ord(key_c)) % 256)
-        dec.append(dec_c)
-
-    return "".join(dec)
-
-
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    if (message.chat.username is None) and (db.token.count_documents({"id": encoder(key, str(message.chat.id))}) == 0):
-        inline_item2 = types.InlineKeyboardButton('Создание Username', url='https://telegram-rus.ru/nik')
+    if (message.chat.username is None) and (db.token.count_documents(
+            {"id": encoder(key, str(message.chat.id))}) == 0):
+        inline_item2 = types.InlineKeyboardButton('Создание Username',
+                                                  url='https://telegram-rus.ru/nik')
         inline_bt2 = types.InlineKeyboardMarkup()
         inline_bt2.add(inline_item2)
 
         bot.send_message(message.chat.id, "У тебя нет никнейма в телеграме, "
                                           "мне приятнее обращаться к людям по никам, а не id. "
                                           "Нажав на кнопку, ты узнаешь, как создать никнейм. "
-                                          "Но если тебя все устраивает, я не настаиваю, моей работе это не помешает 🤔",
+                                          "Но если тебя все устраивает, я не настаиваю, "
+                                          "моей работе это не помешает 🤔",
                          parse_mode="html", reply_markup=inline_bt2)
 
     if message.chat.username is None:
@@ -92,12 +61,14 @@ def send_welcome(message):
     if 11 <= timer[3] < 17:
         bot.send_message(message.chat.id,
                          "Добрый день, " + name_user +
-                         "! Как же ты вовремя я только вернулся с обеденного перекуса 🥘 А ты покушал?",
+                         "! Как же ты вовремя я только вернулся с обеденного перекуса 🥘 "
+                         "А ты покушал?",
                          parse_mode="html")
 
     if 17 <= timer[3] < 23:
         bot.send_message(message.chat.id,
-                         "Добрый вечер, " + name_user + "! Ого уже вечер, ты домой то не собираешься? 🌅",
+                         "Добрый вечер, " + name_user +
+                         "! Ого уже вечер, ты домой то не собираешься? 🌅",
                          parse_mode="html")
 
     if (timer[3] == 23) or (0 <= timer[3] < 5):
@@ -114,17 +85,21 @@ def send_welcome(message):
             cur.append(decoder(key, j))
         token_string = '\n'.join(cur)
 
-        bot.send_message(message.chat.id, "По твоему id в базе данных я нашел следующие TOKEN: " + token_string,
+        bot.send_message(message.chat.id,
+                         "По твоему id в базе данных я нашел следующие TOKEN: "
+                         + token_string,
                          parse_mode="html")
 
         item1 = types.KeyboardButton("Ввод TOKEN")
-        item2 = types.KeyboardButton("Выбор TOKEN")  # TODO: в идеале реализовать поддержку нескольких токенов
+        item2 = types.KeyboardButton("Выбор TOKEN")
+        # TODO: в идеале реализовать поддержку нескольких токенов
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add(item1)
         markup.add(item2)
 
         bot.send_message(message.chat.id,
-                         "Хочешь добавить TOKEN или выбрать один из уже имеющихся - жми на соответствующие кнопочки ",
+                         "Хочешь добавить TOKEN или выбрать один из уже имеющихся - "
+                         "жми на соответствующие кнопочки ",
                          parse_mode="html",
                          reply_markup=markup)
 
@@ -134,7 +109,8 @@ def send_welcome(message):
         bot.send_message(message.chat.id, "По твоему id в базе данных я нашел больше одного упоминания! "
                                           "Это ненормально, но твоей вины здесь нет. "
                                           "Напиши /problem и опиши этот случай "
-                                          "(можешь перекопировать текст моего сообщения). Извини за неудобства 😬",
+                                          "(можешь перекопировать текст моего сообщения). "
+                                          "Извини за неудобства 😬",
                          parse_mode="html")
 
     elif db.token.count_documents({"id": encoder(key, str(message.chat.id))}) == 0:
@@ -149,11 +125,13 @@ def send_welcome(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add(item1)
 
-        bot.send_message(message.chat.id, name_user + ", ты у нас впервые, твой id был удачно записан в базу данных.",
+        bot.send_message(message.chat.id, name_user +
+                         ", ты у нас впервые, твой id был удачно записан в базу данных.",
                          parse_mode="html", reply_markup=markup)
 
         bot.send_message(message.chat.id,
-                         "Теперь давай добавим TOKEN. Если ты не знаешь, где его найти, нажми на кнопочку ",
+                         "Теперь давай добавим TOKEN. "
+                         "Если ты не знаешь, где его найти, нажми на кнопочку ",
                          parse_mode="html", reply_markup=inline_bt1)
 
         bot.register_next_step_handler(message, process_step_1)
@@ -170,12 +148,14 @@ def process_step_1(message):
             cur.append(decoder(key, j))
 
         bot.send_message(message.chat.id,
-                         "Давай выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN: " + '\n'.join(cur),
+                         "Давай выберем, какой TOKEN нужно использовать. "
+                         "Вот список твоих TOKEN: " + '\n'.join(cur),
                          parse_mode="html")
 
         bot.register_next_step_handler(message, process_step_4)
     else:
-        bot.send_message(message.chat.id, 'Странно, такой команды нет...', parse_mode="html",
+        bot.send_message(message.chat.id, 'Странно, такой команды нет...',
+                         parse_mode="html",
                          reply_markup=types.ReplyKeyboardRemove())
 
 
@@ -187,17 +167,20 @@ def process_step_2(message):
         cur.append(decoder(key, j))
 
     if message.text in cur:
-        bot.send_message(message.chat.id, "Данный TOKEN уже есть в нашей базе данных", parse_mode="html",
+        bot.send_message(message.chat.id, "Данный TOKEN уже есть в нашей базе данных",
+                         parse_mode="html",
                          reply_markup=types.ReplyKeyboardRemove())
 
         bot.send_message(message.chat.id,
-                         "Давай тогда выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN: " + '\n'.join(
-                             cur), parse_mode="html")
+                         "Давай тогда выберем, какой TOKEN нужно использовать. "
+                         "Вот список твоих TOKEN: " +
+                         '\n'.join(cur), parse_mode="html")
 
         bot.register_next_step_handler(message, process_step_4)
     else:
         cur.append(message.text)
-        db.token.find_one_and_update({"id": encoder(key, str(message.chat.id))}, {'$set': {"token": encoder(key, cur)}})
+        db.token.find_one_and_update({"id": encoder(key, str(message.chat.id))},
+                                     {'$set': {"token": encoder(key, cur)}})
         bot.send_message(message.chat.id,
                          "Ваш TOKEN был успешно добавлен в нашу базу данных 🎉",
                          parse_mode="html",
@@ -216,12 +199,14 @@ def process_step_4(message):
             gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=message.text)
             gl.auth()
             username = gl.user.username
-            db.token.find_one_and_update({"id": encoder(key, str(message.chat.id)), "token": encoder(key, cur)},
+            db.token.find_one_and_update({"id": encoder(key, str(message.chat.id)),
+                                          "token": encoder(key, cur)},
                                          {'$set': {"idGitLab": encoder(key, username)}})
 
         except gitlab.GitlabAuthenticationError:
             bot.send_message(message.chat.id,
-                             "Произошла ошибка при авторизации в GitLab. Проверьте правильность токена",
+                             "Произошла ошибка при авторизации в GitLab. "
+                             "Проверьте правильность токена",
                              parse_mode="html")
     else:
         bot.send_message(message.chat.id,
@@ -234,9 +219,12 @@ def send_problem(message):
     st2 = open('static/problem.webp', 'rb')
     bot.send_sticker(message.chat.id, st2)
 
-    bot.send_message(message.chat.id, "Ты уверен??? Если ты нашел ошибку... прости нас 😥", parse_mode="html")
+    bot.send_message(message.chat.id, "Ты уверен??? Если ты нашел ошибку... "
+                                      "прости нас 😥",
+                     parse_mode="html")
 
-    bot.send_message(message.chat.id, "Кратко опиши проблему, мы постараемся ее исправить в скором времени 😬\n",
+    bot.send_message(message.chat.id,
+                     "Кратко опиши проблему, мы постараемся ее исправить в скором времени 😬\n",
                      parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
 
     bot.register_next_step_handler(message, process_step_3)
@@ -249,12 +237,14 @@ def process_step_3(message):
         name_user = "@" + message.chat.username
 
     bot.send_message('538587223',
-                     "Имя пользователя, оставившего комментарий: " + name_user + "\nКомментарий: " + message.text,
+                     "Имя пользователя, оставившего комментарий: "
+                     + name_user + "\nКомментарий: " + message.text,
                      parse_mode="html")
 
 
 @bot.message_handler(content_types=['text'])
 def answer(message):
     bot.send_message(message.chat.id,
-                     "К сожалению, я не знаю, что мне ответить 😓\nНапиши / , чтобы увидеть доступные команды",
+                     "К сожалению, я не знаю, что мне ответить 😓\nНапиши / , "
+                     "чтобы увидеть доступные команды",
                      parse_mode="html")
