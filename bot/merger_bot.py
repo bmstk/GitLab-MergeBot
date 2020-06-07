@@ -5,18 +5,21 @@ from base64 import b64decode, b64encode
 import telebot
 from pymongo import MongoClient
 
+def encoderforone(word):
+    enc = []
+    for index, item in enumerate(word):
+        key_c = key[index % len(key)]
+        enc_c = chr(ord(item) + ord(key_c) % 256)
+        enc.append(enc_c)
+    return enc
+
 
 def encoder(key, clear):
     enc = []
     enc1 = []
     if type(clear) == list:
         for word in clear:
-            enc = []
-            # TODO: выделить в отдельную функицю
-            for index, item in enumerate(word):
-                key_c = key[index % len(key)]
-                enc_c = chr(ord(item) + ord(key_c) % 256)
-                enc.append(enc_c)
+            enc = encoderforone(word)
             enc1.append(b64encode("".join(enc).encode()).decode())
         return enc1
     else:
