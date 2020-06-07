@@ -36,7 +36,7 @@ class WebhookServer(object):
                                    private_token=decoder(key, private_key['token'][-1]))  # ['token'][-1]
                 project = gl.projects.get(project_id)  # находим проект
                 result = project.repository_compare(target_branch, source_branch)
-                for receiver in db.token.find(encoder(key, {'idGitLab': i['username']})):
+                for receiver in db.token.find({'idGitLab': encoder(key, i['username'])}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     for i, file in enumerate(result['diffs']):
                         print(action)
