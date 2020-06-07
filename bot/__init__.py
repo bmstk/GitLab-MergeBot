@@ -58,4 +58,3 @@ class WebhookServer(object):
                     bot.send_message(chat_id=receiver['id'],
                                      text="Более подробную информацию о мерж реквесте можно узнать, перейдя по ссылке.",
                                      reply_markup=inline_bt1)
-                    # TODO: тут еще кнопочка нужна со ссылкой на мерж (см merge_request_url)
