@@ -10,9 +10,9 @@ def encoder(key, clear):
     enc = []
     enc1 = []
     if type(clear) == list:
-        for slovo in clear:
+        for word in clear:
             enc = []
-            for index, item in enumerate(slovo):
+            for index, item in enumerate(word):
                 key_c = key[index % len(key)]
                 enc_c = chr(ord(item) + ord(key_c) % 256)
                 enc.append(enc_c)
