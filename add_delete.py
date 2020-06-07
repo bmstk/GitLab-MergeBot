@@ -1,30 +1,20 @@
-import threading
+import time
 
-import cherrypy
 import gitlab
+import telebot
 from gitlab import Gitlab
+from pymongo import MongoClient
 from telebot import types
 
-from bot import WebhookServer, config
-from bot.merger_bot import db, timer, bot
+with open("settings_for_bot.txt", "r") as f:
+    flines = f.readlines()
 
-cherrypy.tree.mount(WebhookServer(), '/')
+timer = time.localtime()
 
-if __name__ == '__main__':
-    # конфигурация сервера
-    cherrypy.config.update({
-        'server.socket_host': config.WEBHOOK_HOST,
-        'server.socket_port': config.WEBHOOK_PORT,
-        'server.ssl_module': 'builtin',
-        'server.ssl_certificate': config.WEBHOOK_SSL_CERT,
-        'server.ssl_private_key': config.WEBHOOK_SSL_PRIV,
-    })
+bot = telebot.TeleBot(flines[0][:len(flines[0]) - 1])
 
-    # параллельный запуск бота и сервера
-    server_thread = threading.Thread(target=cherrypy.quickstart, args=(WebhookServer(),))
-    bot_thread = threading.Thread(target=bot.polling)
-    server_thread.start()
-    bot_thread.start()
+client = MongoClient(flines[1][:len(flines[1])])
+db = client.mergebot
 
 
 @bot.message_handler(commands=['start'])
@@ -288,3 +278,6 @@ def answer(message):
     bot.send_message(message.chat.id,
                      "К сожалению, я не знаю, что мне ответить 😓\nНапиши / , чтобы увидеть доступные команды",
                      parse_mode="html")
+
+
+bot.polling()
