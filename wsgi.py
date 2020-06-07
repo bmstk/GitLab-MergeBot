@@ -45,8 +45,8 @@ def send_welcome(message):
     else:
         name_user = "@" + message.chat.username
 
-    # st = open('static/privet.webp', 'rb')
-    # bot.send_sticker(message.chat.id, st)
+    st = open('static/privet.webp', 'rb')
+    bot.send_sticker(message.chat.id, st)
 
     if 5 <= timer[3] < 11:
         bot.send_message(message.chat.id,
@@ -77,37 +77,24 @@ def send_welcome(message):
         cursor1 = dict(cursor)
         for j in cursor1['token']:
             cur.append(j)
-        token_string = '\n'.join(cur)
+            cur.append('\n')
+        token_string = ' '.join(cur)
 
-        if cur != []:
-            bot.send_message(message.chat.id, "По твоему id в базе данных я нашел следующие TOKEN:\n" + token_string,
-                             parse_mode="html")
+        bot.send_message(message.chat.id, "По твоему id в базе данных я нашел следующие TOKEN: " + token_string,
+                         parse_mode="html")
 
-            item1 = types.KeyboardButton("Ввод TOKEN")
-            item2 = types.KeyboardButton("Выбор TOKEN")
-            item3 = types.KeyboardButton("Удаление TOKEN")
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(item1)
-            markup.add(item2)
-            markup.add(item3)
+        item1 = types.KeyboardButton("Ввод TOKEN")
+        item2 = types.KeyboardButton("Выбор TOKEN")  # TODO: в идеале реализовать поддержку нескольких токенов
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add(item1)
+        markup.add(item2)
 
-            bot.send_message(message.chat.id,
-                             "Хочешь добавить TOKEN, выбрать или удалить один из уже имеющихся - жми на соответствующие кнопочки ",
-                             parse_mode="html",
-                             reply_markup=markup)
+        bot.send_message(message.chat.id,
+                         "Хочешь добавить TOKEN или выбрать один из уже имеющихся - жми на соответствующие кнопочки ",
+                         parse_mode="html",
+                         reply_markup=markup)
 
-            bot.register_next_step_handler(message, process_step_1)
-
-        elif cur == []:
-            item1 = types.KeyboardButton("Ввод TOKEN")
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(item1)
-
-            bot.send_message(message.chat.id,
-                             name_user + ", по твоему id не было найденно ни одного TOKEN. Давай добавим, жми на кнопочку",
-                             parse_mode="html", reply_markup=markup)
-
-            bot.register_next_step_handler(message, process_step_1)
+        bot.register_next_step_handler(message, process_step_1)
 
     elif db.token.count_documents({"id": message.chat.id}) > 1:
         bot.send_message(message.chat.id, "По твоему id в базе данных я нашел больше одного упоминания! "
@@ -117,10 +104,10 @@ def send_welcome(message):
                          parse_mode="html")
 
     elif db.token.count_documents({"id": message.chat.id}) == 0:
-        db.token.insert_one({"id": message.chat.id, "token": [], "idGitLab": []})
+        db.token.insert_one({"id": message.chat.id, "token": [],
+                             'idGitLab': []})  # TODO: Изменить idGitLab на словарь "сервис" : "токен"
 
-        inline_item1 = types.InlineKeyboardButton('Как получить TOKEN',
-                                                  url='https://habr.com/ru/company/flant/blog/340996/')
+        inline_item1 = types.InlineKeyboardButton('Как получить TOKEN', url='https://git.iu7.bmstu.ru/')
         inline_bt1 = types.InlineKeyboardMarkup()
         inline_bt1.add(inline_item1)
 
@@ -149,22 +136,10 @@ def process_step_1(message):
             cur.append(j)
 
         bot.send_message(message.chat.id,
-                         "Давай выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN:\n" + '\n'.join(cur),
-                         parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
+                         "Давай выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN: " + '\n'.join(cur),
+                         parse_mode="html")
 
         bot.register_next_step_handler(message, process_step_4)
-    elif message.text == 'Удаление TOKEN':
-        cursor3 = db.token.find_one({"id": message.chat.id})
-        cur = []
-        cursor4 = dict(cursor3)
-        for j in cursor4["token"]:
-            cur.append(j)
-
-        bot.send_message(message.chat.id,
-                         "Давай выберем, какой TOKEN нужно удалить. Вот список твоих TOKEN:\n" + '\n'.join(cur),
-                         parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
-
-        bot.register_next_step_handler(message, process_step_5)
     else:
         bot.send_message(message.chat.id, 'Странно, такой команды нет...', parse_mode="html",
                          reply_markup=types.ReplyKeyboardRemove())
@@ -182,7 +157,7 @@ def process_step_2(message):
                          reply_markup=types.ReplyKeyboardRemove())
 
         bot.send_message(message.chat.id,
-                         "Давай тогда выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN:\n" + '\n'.join(
+                         "Давай тогда выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN: " + '\n'.join(
                              cur), parse_mode="html")
 
         bot.register_next_step_handler(message, process_step_4)
@@ -213,56 +188,17 @@ def process_step_4(message):
         except gitlab.GitlabAuthenticationError:
             bot.send_message(message.chat.id,
                              "Произошла ошибка при авторизации в GitLab. Проверьте правильность токена",
-                             parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
+                             parse_mode="html")
     else:
         bot.send_message(message.chat.id,
                          "Такого TOKEN нет в твоем списке...",
-                         parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
-
-
-def process_step_5(message):
-    if message.chat.username is None:
-        name_user = str(message.chat.id)
-    else:
-        name_user = "@" + message.chat.username
-
-    cursor3 = db.token.find_one({"id": message.chat.id})
-    cur = []
-    cursor4 = dict(cursor3)
-    for j in cursor4["token"]:
-        cur.append(j)
-
-    if message.text in cur:
-        for j, i in enumerate(cur):
-            if message.text == i:
-                cur.pop(j)
-
-        db.token.find_one_and_update({"id": message.chat.id}, {'$set': {"token": cur}})
-        bot.send_message(message.chat.id, "Ваш TOKEN ( " + message.text + " ) был удачно удален из нашей базы данных",
                          parse_mode="html")
-        if len(cur) != 0:
-            item3 = types.KeyboardButton("Удаление TOKEN")
-            markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup1.add(item3)
-
-            bot.send_message(message.chat.id, "Могу предложить удалить еще TOKEN. Если надо, жми кнопочку",
-                             parse_mode="html", reply_markup=markup1)
-
-            bot.register_next_step_handler(message, process_step_1)
-        else:
-            bot.send_message(message.chat.id, name_user + ", ты удалил все TOKEN", parse_mode="html",
-                             reply_markup=types.ReplyKeyboardRemove())
-
-    else:
-        bot.send_message(message.chat.id,
-                         "Такого TOKEN нет в твоем списке...",
-                         parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
 
 
 @bot.message_handler(commands=['problem'])
 def send_problem(message):
-    # st2 = open('static/problem.webp', 'rb')
-    # bot.send_sticker(message.chat.id, st2)
+    st2 = open('static/problem.webp', 'rb')
+    bot.send_sticker(message.chat.id, st2)
 
     bot.send_message(message.chat.id, "Ты уверен??? Если ты нашел ошибку... прости нас 😥", parse_mode="html")
 
