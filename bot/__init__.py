@@ -24,7 +24,7 @@ class WebhookServer(object):
             author_name = raw_json['user']['name']  # имя автора merge request
             merge_request_url = raw_json['object_attributes']['url']  # адрес страницы merge request
             mg_title = raw_json['object_attributes']['title']  # заголовок мерд реквеста
-            is_new = raw_json['changes']['updated_at']['previous']
+            is_new = raw_json['changes']['updated_at']['previous']  # проверяем, были ли обновления до этого
             print(is_new)
             if is_new is None:
                 is_new = True
