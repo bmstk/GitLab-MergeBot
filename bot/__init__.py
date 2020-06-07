@@ -25,7 +25,6 @@ class WebhookServer(object):
             merge_request_url = raw_json['object_attributes']['url']  # адрес страницы merge request
             mg_title = raw_json['object_attributes']['title']  # заголовок мерд реквеста
             action = raw_json['object_attributes']['action']  # действие
-
             ##########################################################################################
 
             for i in assignees_array:  # для каждого пользователя
@@ -54,10 +53,10 @@ class WebhookServer(object):
                             message = "Merge request {0} был закрыт.".format(mg_title)
                             bot.send_message(chat_id=receiver['id'], text=message)
 
-                inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
-                inline_bt1 = types.InlineKeyboardMarkup()
-                inline_bt1.add(inline_item1)
+                    inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
+                    inline_bt1 = types.InlineKeyboardMarkup()
+                    inline_bt1.add(inline_item1)
 
-                bot.send_message(chat_id=receiver['id'],
+                    bot.send_message(chat_id=receiver['id'],
                                  text="Более подробную информацию о мерж реквесте можно узнать, перейдя по ссылке.",
                                  reply_markup=inline_bt1)
