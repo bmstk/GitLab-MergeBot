@@ -1,6 +1,8 @@
 import cherrypy
 import gitlab
 
+from telebot import types
+
 from bot import config
 from bot.merger_bot import bot, db
 
@@ -41,4 +43,12 @@ class WebhookServer(object):
                                                            source_branch,
                                                            project_name).replace("_", "\_")
                         bot.send_message(chat_id=receiver['id'], text=message + diff, parse_mode="markdown")
-                        # TODO: тут еще кнопочка нужна со ссылкой на мерж (см merge_request_url)
+
+                    inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
+                    inline_bt1 = types.InlineKeyboardMarkup()
+                    inline_bt1.add(inline_item1)
+
+                    bot.send_message(chat_id=receiver['id'],
+                                     text="Более подробную информацию о мерж реквесте можно узнать, перейдя по ссылке.",
+                                     reply_markup=inline_bt1)
+                    # TODO: тут еще кнопочка нужна со ссылкой на мерж (см merge_request_url)
