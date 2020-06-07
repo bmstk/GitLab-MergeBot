@@ -44,6 +44,8 @@ with open("./bot/bot_settings.json", "r") as f:
 
 timer = time.localtime()
 
+key = 'SL0gkn6fTXZOPIt@|sW@F7?oQO%zsKJy'
+
 telegram_token = data['telegram_token']
 bot = telebot.TeleBot(telegram_token)
 client = MongoClient(data['mongodb_url'])

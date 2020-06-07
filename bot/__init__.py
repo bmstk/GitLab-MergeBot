@@ -3,7 +3,7 @@ import gitlab
 from telebot import types
 
 from bot import config
-from bot.merger_bot import bot, db
+from bot.merger_bot import bot, db, encoder, decoder, key
 
 
 class WebhookServer(object):
@@ -28,15 +28,17 @@ class WebhookServer(object):
             ##########################################################################################
 
             for i in assignees_array:  # для каждого пользователя
-                private_key = db.token.find_one({'idGitLab': i['username']})  # достаем ключ авторизации пользователя
+                private_key = db.token.find_one(
+                    {'idGitLab': encoder(key, i['username'])})  # достаем ключ авторизации пользователя
 
                 # авторизуемся для каждого юзера по последнему токену TODO: оставить только один возможный токен
-                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][-1])  # ['token'][-1]
+                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/',
+                                   private_token=decoder(key, private_key['token'][-1]))  # ['token'][-1]
                 project = gl.projects.get(project_id)  # находим проект
                 result = project.repository_compare(target_branch, source_branch)
-                for receiver in db.token.find({'idGitLab': i['username']}):
+                for receiver in db.token.find({'idGitLab': encoder(key, i['username'])}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
-                    for file in result['diffs']:
+                    for i, file in enumerate(result['diffs']):
                         if action == 'open':
                             diff = "```" + str(file['diff']).replace("```", "\`\`\`") + "```"
                             message = "Пользователь {0} отправил Вам " \
@@ -44,19 +46,26 @@ class WebhookServer(object):
                                       "в проекте {3}\n".format(author_name, target_branch,
                                                                source_branch,
                                                                project_name).replace("_", "\_")
-                            bot.send_message(chat_id=receiver['id'], text=message + diff, parse_mode="markdown")
+                            bot.send_message(chat_id=decoder(key, receiver['id']), text=message + diff,
+                                             parse_mode="markdown")
 
-                        if action == 'update':
+                        if action == 'update' and i < 1:
                             message = "В Merge Request {0} произошло новое событие.".format(mg_title)
-                            bot.send_message(chat_id=receiver['id'], text=message)
-                        if action == 'close':
-                            message = "Merge request {0} был закрыт.".format(mg_title)
-                            bot.send_message(chat_id=receiver['id'], text=message)
+                            bot.send_message(chat_id=decoder(key, receiver['id']), text=message)
 
+                        if action == 'close' and i < 1:
+                            message = "Merge request {0} был закрыт.".format(mg_title)
+                            bot.send_message(chat_id=decoder(key, receiver['id']), text=message)
+
+                        if (action == 'update' or action == 'close') and i >= 1 and len(result['diffs']) - 1 != 0:
+                            message = "А так же еще {0} изменений".format(len(result['diffs']) - 1)
+                            bot.send_message(chat_id=decoder(key, receiver['id']), text=message)
+                            break  # прерываем вывод сообщений, чтобы не засорять чат
+
+                    # отсылаем кнопочку со ссылкой на merge request
                     inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
                     inline_bt1 = types.InlineKeyboardMarkup()
                     inline_bt1.add(inline_item1)
-
-                    bot.send_message(chat_id=receiver['id'],
-                                 text="Более подробную информацию о мерж реквесте можно узнать, перейдя по ссылке.",
-                                 reply_markup=inline_bt1)
+                    bot.send_message(chat_id=decoder(key, receiver['id']),
+                                     text="Более подробную информацию о мерж реквесте можно узнать, перейдя по ссылке.",
+                                     reply_markup=inline_bt1)
