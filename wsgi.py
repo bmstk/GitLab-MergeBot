@@ -6,10 +6,9 @@ from gitlab import Gitlab
 from telebot import types
 
 from bot import WebhookServer, config
-from bot.merger_bot import db, timer, bot, decoder, encoder
+from bot.merger_bot import db, timer, bot, decoder, encoder, key
 
 cherrypy.tree.mount(WebhookServer(), '/')
-key = 'SL0gkn6fTXZOPIt@|sW@F7?oQO%zsKJy'
 
 if __name__ == '__main__':
     # конфигурация сервера

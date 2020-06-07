@@ -3,8 +3,7 @@ import gitlab
 from telebot import types
 
 from bot import config
-from bot.merger_bot import bot, db, encoder, decoder
-from wsgi import key
+from bot.merger_bot import bot, db, encoder, decoder, key
 
 
 class WebhookServer(object):
