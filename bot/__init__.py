@@ -39,7 +39,6 @@ class WebhookServer(object):
                 for receiver in db.token.find({'idGitLab': encoder(key, i['username'])}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     for i, file in enumerate(result['diffs']):
-                        print(action)
                         if action == 'open':
                             diff = "```" + str(file['diff']).replace("```", "\`\`\`") + "```"
                             message = "Пользователь {0} отправил Вам " \
