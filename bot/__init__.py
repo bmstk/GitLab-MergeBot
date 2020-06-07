@@ -62,5 +62,5 @@ class WebhookServer(object):
                     inline_bt1.add(inline_item1)
 
                     bot.send_message(chat_id=receiver['id'],
-                                 text="Более подробную информацию о мерж реквесте можно узнать, перейдя по ссылке.",
-                                 reply_markup=inline_bt1)
+                                     text="Более подробную информацию о мерж реквесте можно узнать, перейдя по ссылке.",
+                                     reply_markup=inline_bt1)
