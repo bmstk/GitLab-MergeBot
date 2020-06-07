@@ -60,7 +60,7 @@ class WebhookServer(object):
                         if (action == 'update' or action == 'close') and i >= 1 and len(result['diffs']) - 1 != 0:
                             message = "А так же еще {0} изменений".format(len(result['diffs']))
                             bot.send_message(chat_id=decoder(key, receiver['id']), text=message)
-                            break
+                            break  # прерываем вывод сообщений, чтобы не засорять чат
 
                     # отсылаем кнопочку со ссылкой на merge request
                     inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
