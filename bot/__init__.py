@@ -1,6 +1,5 @@
 import cherrypy
 import gitlab
-
 from telebot import types
 
 from bot import config
@@ -24,6 +23,10 @@ class WebhookServer(object):
             target_branch = raw_json['object_attributes']['target_branch']  # ветка, в которую сливаем
             author_name = raw_json['user']['name']  # имя автора merge request
             merge_request_url = raw_json['object_attributes']['url']  # адрес страницы merge request
+            mg_title = raw_json['object_attributes']['title']
+            is_new = raw_json['changes']['updated_at']['previous']
+            if is_new is None:
+                is_new = True
             ##########################################################################################
 
             for i in assignees_array:  # для каждого пользователя
@@ -36,13 +39,17 @@ class WebhookServer(object):
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     for file in result['diffs']:
-                        diff = "```" + str(file['diff']).replace("```", "\`\`\`") + "```"
-                        message = "Пользователь {0} отправил Вам " \
-                                  "запрос на слитие веток {1} и {2} " \
-                                  "в проекте {3}\n".format(author_name, target_branch,
-                                                           source_branch,
-                                                           project_name).replace("_", "\_")
-                        bot.send_message(chat_id=receiver['id'], text=message + diff, parse_mode="markdown")
+                        if is_new:
+                            diff = "```" + str(file['diff']).replace("```", "\`\`\`") + "```"
+                            message = "Пользователь {0} отправил Вам " \
+                                      "запрос на слитие веток {1} и {2} " \
+                                      "в проекте {3}\n".format(author_name, target_branch,
+                                                               source_branch,
+                                                               project_name).replace("_", "\_")
+                            bot.send_message(chat_id=receiver['id'], text=message + diff, parse_mode="markdown")
+                        else:
+                            message = "В Merge Request {0} произошло новое событие.".format(mg_title)
+                            bot.send_message(chat_id=receiver['id'], text=message)
 
                     inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
                     inline_bt1 = types.InlineKeyboardMarkup()
