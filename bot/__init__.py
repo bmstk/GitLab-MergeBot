@@ -13,7 +13,7 @@ class WebhookServer(object):
         # raw_body = cherrypy.request.body.read()
         raw_json = cherrypy.request.json  # получаем вебхук
         if raw_json['object_kind'] == 'merge_request':  # если вебхук вызван мержреквестом
-            print(raw_json)
+            #print(raw_json)
 
             # Парсинг вебхука ########################################################################
             assignees_array = raw_json['assignees']  # находим всем юзеров, заасаненных к мержреквесту
@@ -25,6 +25,7 @@ class WebhookServer(object):
             merge_request_url = raw_json['object_attributes']['url']  # адрес страницы merge request
             mg_title = raw_json['object_attributes']['title']
             is_new = raw_json['changes']['updated_at']['previous']
+            print(is_new)
             if is_new is None:
                 is_new = True
             ##########################################################################################
@@ -40,6 +41,7 @@ class WebhookServer(object):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     for file in result['diffs']:
                         if is_new:
+                            print(is_new)
                             diff = "```" + str(file['diff']).replace("```", "\`\`\`") + "```"
                             message = "Пользователь {0} отправил Вам " \
                                       "запрос на слитие веток {1} и {2} " \
