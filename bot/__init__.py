@@ -58,7 +58,7 @@ class WebhookServer(object):
                             bot.send_message(chat_id=decoder(key, receiver['id']), text=message)
 
                         if (action == 'update' or action == 'close') and i >= 1 and len(result['diffs']) - 1 != 0:
-                            message = "А так же еще {0} изменений".format(len(result['diffs']) - 3)
+                            message = "А так же еще {0} изменений".format(len(result['diffs']))
                             bot.send_message(chat_id=decoder(key, receiver['id']), text=message)
                             break
 
