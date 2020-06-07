@@ -24,7 +24,7 @@ class WebhookServer(object):
             author_name = raw_json['user']['name']  # имя автора merge request
             merge_request_url = raw_json['object_attributes']['url']  # адрес страницы merge request
             mg_title = raw_json['object_attributes']['title']  # заголовок мерд реквеста
-            action = raw_json['object_attributes']['action']  # проверяем, были ли обновления до этого
+            action = raw_json['object_attributes']['action']  # действие
 
             ##########################################################################################
 
