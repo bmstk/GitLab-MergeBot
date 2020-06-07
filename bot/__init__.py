@@ -3,7 +3,8 @@ import gitlab
 from telebot import types
 
 from bot import config
-from bot.merger_bot import bot, db
+from bot.merger_bot import bot, db, encoder, decoder
+from wsgi import key
 
 
 class WebhookServer(object):
@@ -28,15 +29,18 @@ class WebhookServer(object):
             ##########################################################################################
 
             for i in assignees_array:  # для каждого пользователя
-                private_key = db.token.find_one({'idGitLab': i['username']})  # достаем ключ авторизации пользователя
+                private_key = db.token.find_one(
+                    {'idGitLab': encoder(key, i['username'])})  # достаем ключ авторизации пользователя
 
                 # авторизуемся для каждого юзера по последнему токену TODO: оставить только один возможный токен
-                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/', private_token=private_key['token'][-1])  # ['token'][-1]
+                gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/',
+                                   private_token=decoder(key, private_key['token'][-1]))  # ['token'][-1]
                 project = gl.projects.get(project_id)  # находим проект
                 result = project.repository_compare(target_branch, source_branch)
-                for receiver in db.token.find({'idGitLab': i['username']}):
+                for receiver in db.token.find(encoder(key, {'idGitLab': i['username']})):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                     for i, file in enumerate(result['diffs']):
+                        print(action)
                         if action == 'open':
                             diff = "```" + str(file['diff']).replace("```", "\`\`\`") + "```"
                             message = "Пользователь {0} отправил Вам " \
