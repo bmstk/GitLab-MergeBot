@@ -36,7 +36,7 @@ class WebhookServer(object):
                 result = project.repository_compare(target_branch, source_branch)
                 for receiver in db.token.find({'idGitLab': i['username']}):
                     # для каждого телеграм аккаунта, прикрепленного к этому юзеру
-                    for file in result['diffs']:
+                    for i, file in enumerate(result['diffs']):
                         if action == 'open':
                             diff = "```" + str(file['diff']).replace("```", "\`\`\`") + "```"
                             message = "Пользователь {0} отправил Вам " \
@@ -46,9 +46,13 @@ class WebhookServer(object):
                                                                project_name).replace("_", "\_")
                             bot.send_message(chat_id=receiver['id'], text=message + diff, parse_mode="markdown")
 
-                        if action == 'update':
+                        if action == 'update' and i <= 3:
                             message = "В Merge Request {0} произошло новое событие.".format(mg_title)
                             bot.send_message(chat_id=receiver['id'], text=message)
+                        if action == 'update' and i > 3:
+                            message = "А так же еще {0} изменений".format(len(file['diff']) - 3)
+                            bot.send_message(chat_id=receiver['id'], text=message)
+                            break
                         if action == 'close':
                             message = "Merge request {0} был закрыт.".format(mg_title)
                             bot.send_message(chat_id=receiver['id'], text=message)
