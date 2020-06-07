@@ -1,8 +1,42 @@
 import json
 import time
+from base64 import b64decode, b64encode
 
 import telebot
 from pymongo import MongoClient
+
+
+def encoder(key, clear):
+    enc = []
+    enc1 = []
+    if type(clear) == list:
+        for slovo in clear:
+            enc = []
+            for index, item in enumerate(slovo):
+                key_c = key[index % len(key)]
+                enc_c = chr(ord(item) + ord(key_c) % 256)
+                enc.append(enc_c)
+            enc1.append(b64encode("".join(enc).encode()).decode())
+        return enc1
+    else:
+        for index, item in enumerate(clear):
+            key_c = key[index % len(key)]
+            enc_c = chr(ord(item) + ord(key_c) % 256)
+            enc.append(enc_c)
+
+        return b64encode("".join(enc).encode()).decode()
+
+
+def decoder(key, enc):
+    dec = []
+    enc = b64decode(enc).decode()
+    for index, item in enumerate(enc):
+        key_c = key[index % len(key)]
+        dec_c = chr((256 + ord(item) - ord(key_c)) % 256)
+        dec.append(dec_c)
+
+    return "".join(dec)
+
 
 with open("./bot/bot_settings.json", "r") as f:
     data = json.load(f)
