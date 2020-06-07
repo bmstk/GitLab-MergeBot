@@ -41,4 +41,6 @@ class WebhookServer(object):
                                                            source_branch,
                                                            project_name).replace("_", "\_")
                         bot.send_message(chat_id=receiver['id'], text=message + diff, parse_mode="markdown")
-                        # TODO: тут еще кнопочка нужна со ссылкой на мерж (см merge_request_url)
+                    bot.send_message(chat_id=receiver['id'],
+                                     text="Более подробную информацию о мерж реквесте можно узнать, перейдя по ссылке.")
+                    # TODO: тут еще кнопочка нужна со ссылкой на мерж (см merge_request_url)
