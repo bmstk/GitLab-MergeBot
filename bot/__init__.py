@@ -1,6 +1,8 @@
 import cherrypy
 import gitlab
 
+from telebot import types
+
 from bot import config
 from bot.merger_bot import bot, db
 
