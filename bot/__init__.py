@@ -47,23 +47,24 @@ class WebhookServer(object):
                                       "в проекте {3}\n".format(author_name, target_branch,
                                                                source_branch,
                                                                project_name).replace("_", "\_")
-                            bot.send_message(chat_id=receiver['id'], text=message + diff, parse_mode="markdown")
+                            bot.send_message(chat_id=decoder(key, receiver['id']), text=message + diff,
+                                             parse_mode="markdown")
 
                         if action == 'update' and i <= 3:
                             message = "В Merge Request {0} произошло новое событие.".format(mg_title)
-                            bot.send_message(chat_id=receiver['id'], text=message)
+                            bot.send_message(chat_id=decoder(key, receiver['id']), text=message)
                         if action == 'update' and i > 3:
                             message = "А так же еще {0} изменений".format(len(file['diff']) - 3)
-                            bot.send_message(chat_id=receiver['id'], text=message)
+                            bot.send_message(chat_id=decoder(key, receiver['id']), text=message)
                             break
                         if action == 'close':
                             message = "Merge request {0} был закрыт.".format(mg_title)
-                            bot.send_message(chat_id=receiver['id'], text=message)
+                            bot.send_message(chat_id=decoder(key, receiver['id']), text=message)
 
                     inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
                     inline_bt1 = types.InlineKeyboardMarkup()
                     inline_bt1.add(inline_item1)
 
-                    bot.send_message(chat_id=receiver['id'],
+                    bot.send_message(chat_id=decoder(key, receiver['id']),
                                      text="Более подробную информацию о мерж реквесте можно узнать, перейдя по ссылке.",
                                      reply_markup=inline_bt1)
