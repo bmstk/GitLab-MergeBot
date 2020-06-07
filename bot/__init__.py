@@ -62,7 +62,7 @@ class WebhookServer(object):
                             bot.send_message(chat_id=decoder(key, receiver['id']), text=message)
                             break
 
-                    # отсылаем кнопочку со ссылкой наmerge request
+                    # отсылаем кнопочку со ссылкой на merge request
                     inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
                     inline_bt1 = types.InlineKeyboardMarkup()
                     inline_bt1.add(inline_item1)
