@@ -1,5 +1,6 @@
 import cherrypy
 import gitlab
+import telebot
 from telebot import types
 
 from bot import config
@@ -37,7 +38,7 @@ class WebhookServer(object):
                 if private_key is None:
                     print("Warning! No user was found to a merge request!")
                 else:
-                    # авторизуемся для каждого юзера по последнему токену TODO: оставить только один возможный токен
+                    # авторизуемся для каждого юзера по последнему токену
                     gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/',
                                        private_token=decoder(private_key['token'][-1]))  # ['token'][-1]
                     project = gl.projects.get(project_id)  # находим проект
@@ -55,15 +56,21 @@ class WebhookServer(object):
                                                                        target_branch,
                                                                        source_branch,
                                                                        project_name).replace("_", "\_")
-                                    bot.send_message(chat_id=decoder(receiver['id']), text=message + diff,
-                                                     parse_mode="markdown")
+                                    try:
+                                        bot.send_message(chat_id=decoder(receiver['id']), text=message + diff,
+                                                         parse_mode="markdown")
+                                    except telebot.apihelper.ApiException:
+                                        print("The chat was not founded. It looks like a trouble with db :c")
 
                                 if action == 'reopen' and j < 1:
                                     message = "В проекте \"{0}\" пользователем {1} " \
                                               "был переоткрыт merge request {2)".format(project_name,
                                                                                         author_name,
                                                                                         mg_title)
-                                    bot.send_message(chat_id=receiver['id'], text=message)
+                                    try:
+                                        bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                    except telebot.apihelper.ApiException:
+                                        print("The chat was not founded. It looks like a trouble with db :c")
 
                                 if action == 'update' and j < 1:
                                     message = "В Merge Request {0} произошло новое событие.".format(mg_title)
@@ -71,20 +78,33 @@ class WebhookServer(object):
 
                                 if action == 'close' and j < 1:
                                     message = "Merge request {0} был закрыт.".format(mg_title)
-                                    bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                    try:
+                                        bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                    except telebot.apihelper.ApiException:
+                                        print("The chat was not founded. It looks like a trouble with db :c")
 
                                 if action == 'none' and j < 1:
                                     message = "В Merge Request {0} произошло новое событие.".format(mg_title)
-                                    bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                    try:
+                                        bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                    except telebot.apihelper.ApiException:
+                                        print("The chat was not founded. It looks like a trouble with db :c")
 
-                                if (action == 'update' or action == 'close' or action == 'none') and j >= 1 and len(
+                                if (action == 'update' or action == 'close') and j >= 1 and len(
                                         result['diffs']) - 1 != 0:
                                     message = "А так же еще изменения в {0} файлах".format(len(result['diffs']) - 1)
-                                    bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                    try:
+                                        bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                    except telebot.apihelper.ApiException:
+                                        print("The chat was not founded. It looks like a trouble with db :c")
                                     break  # прерываем вывод сообщений, чтобы не засорять чат
                         else:
                             message = "В репозитории {0} произошло неопознанное событие".format(project_name)
-                            bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                            try:
+                                bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                            except telebot.apihelper.ApiException:
+                                print("The chat was not founded. It looks like a trouble with db :c")
+
                         # отсылаем кнопочку со ссылкой на merge request
                         inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
                         inline_bt1 = types.InlineKeyboardMarkup()
