@@ -6,29 +6,30 @@ import telebot
 from pymongo import MongoClient
 
 
-def encoder(key, clear):
+def encode_process(index, item):
+    key_c = key[index % len(key)]
+    enc_c = chr(ord(item) + ord(key_c) % 256)
+    return enc_c
+
+
+def encoder(clear):
     enc = []
     enc1 = []
     if type(clear) == list:
         for word in clear:
             enc = []
-            # TODO: выделить в отдельную функицю
             for index, item in enumerate(word):
-                key_c = key[index % len(key)]
-                enc_c = chr(ord(item) + ord(key_c) % 256)
-                enc.append(enc_c)
+                enc.append(encode_process(index, item))
             enc1.append(b64encode("".join(enc).encode()).decode())
         return enc1
     else:
         for index, item in enumerate(clear):
-            key_c = key[index % len(key)]
-            enc_c = chr(ord(item) + ord(key_c) % 256)
-            enc.append(enc_c)
+            enc.append(encode_process(index, item))
 
         return b64encode("".join(enc).encode()).decode()
 
 
-def decoder(key, enc):
+def decoder(enc):
     dec = []
     enc = b64decode(enc).decode()
     for index, item in enumerate(enc):
