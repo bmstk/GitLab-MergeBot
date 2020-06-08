@@ -109,7 +109,10 @@ class WebhookServer(object):
                         inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
                         inline_bt1 = types.InlineKeyboardMarkup()
                         inline_bt1.add(inline_item1)
-                        bot.send_message(chat_id=decoder(receiver['id']),
-                                         text="Более подробную информацию о мерж реквесте можно узнать, "
-                                              "перейдя по ссылке.",
-                                         reply_markup=inline_bt1)
+                        try:
+                            bot.send_message(chat_id=decoder(receiver['id']),
+                                             text="Более подробную информацию о мерж реквесте можно узнать, "
+                                                  "перейдя по ссылке.",
+                                             reply_markup=inline_bt1)
+                        except telebot.apihelper.ApiException:
+                            print("The chat was not founded. It looks like a trouble with db :c")
