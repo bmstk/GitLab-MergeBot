@@ -232,6 +232,9 @@ def process_step_4(message):
             db.token.find_one_and_update({"id": encoder(key, str(message.chat.id)), "token": encoder(key, cur)}, {'$set': {"idGitLab": encoder(key, username)}})
 
         except gitlab.GitlabAuthenticationError:
+            #st4 = open('', 'rb')
+            #bot.send_sticker(message.chat.id, st4)
+            
             bot.send_message(message.chat.id,
                              "Произошла ошибка при авторизации в GitLab. Проверьте правильность токена",
                              parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
@@ -298,6 +301,21 @@ def process_step_3(message):
                      "Имя пользователя, оставившего комментарий: " + name_user + "\nКомментарий: " + message.text,
                      parse_mode="html")
 
+        
+@bot.message_handler(commands=['help'])
+def send_instruction(message):
+    # путь на стикер из статичной папки !!!!st3 = open('', 'rb')
+    #bot.send_sticker(message.chat.id, st3)
+
+    bot.send_message(message.chat.id, "На данный момент бот работает только с версией\
+GitLab v12.10.2(именно она установлена на гите кафедры).\nСо временем планируется расширение функционала.", parse_mode="html")
+    bot.send_message(message.chat.id, "Для того, чтобы начать работу с нашим ботом необходимо:", parse_mode="html")
+    bot.send_message(message.chat.id, "Авторизоваться в системе с помощью приватного токена авторизации (получить его можно в настройках своего профиля - AcessTokens,\
+ боту необходим доступ для чтения пользователя и репозитория)", parse_mode="html")
+    bot.send_message(message.chat.id, "Для того, чтобы начать получать уведомления о приходящих Merge нужно:", parse_mode="html")
+    bot.send_message(message.chat.id, "Если вы владелец репозитория, зайти в его настройки -> Webhooks и в поле адреса URL вписать наш адрес: http://64.227.126.203:443.", parse_mode="html")
+    bot.send_message(message.chat.id, "Внимание ‼️ Временно необходимо снять ✅ с пункта SSL верификации.\
+ Если же репозиторий вам не пренадлежит, следует обратиться к его мэйнтейнеру.", parse_mode="html")
 
 @bot.message_handler(content_types=['text'])
 def answer(message):
