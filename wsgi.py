@@ -6,7 +6,7 @@ from gitlab import Gitlab
 from telebot import types
 
 from bot import config, WebhookServer
-from bot.merger_bot import bot, db, decoder, encoder, key, timer
+from bot.merger_bot import bot, db, decoder, encoder, timer
 
 cherrypy.tree.mount(WebhookServer(), '/')
 
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    if (message.chat.username is None) and (db.token.count_documents({"id": encoder(key, str(message.chat.id))}) == 0):
+    if (message.chat.username is None) and (db.token.count_documents({"id": encoder(str(message.chat.id))}) == 0):
         inline_item2 = types.InlineKeyboardButton('Создание Username', url='https://telegram-rus.ru/nik')
         inline_bt2 = types.InlineKeyboardMarkup()
         inline_bt2.add(inline_item2)
@@ -73,12 +73,12 @@ def send_welcome(message):
                          "! Ты чего не спишь, давай не засиживайся, спать - полезно 😴",
                          parse_mode="html")
 
-    if db.token.count_documents({"id": encoder(key, str(message.chat.id))}) == 1:
-        cursor = db.token.find_one({"id": encoder(key, str(message.chat.id))})
+    if db.token.count_documents({"id": encoder(str(message.chat.id))}) == 1:
+        cursor = db.token.find_one({"id": encoder(str(message.chat.id))})
         cur = []
         cursor1 = dict(cursor)
         for j in cursor1['token']:
-            cur.append(decoder(key, j))
+            cur.append(decoder(j))
         token_string = '\n'.join(cur)
 
         if cur:
@@ -114,7 +114,7 @@ def send_welcome(message):
 
             bot.register_next_step_handler(message, process_step_1)
 
-    elif db.token.count_documents({"id": encoder(key, str(message.chat.id))}) > 1:
+    elif db.token.count_documents({"id": encoder(str(message.chat.id))}) > 1:
         bot.send_message(message.chat.id,
                          "По твоему id в базе данных я нашел больше одного упоминания! "
                          "Это ненормально, но твоей вины здесь нет. "
@@ -122,8 +122,8 @@ def send_welcome(message):
                          "(можешь перекопировать текст моего сообщения). Извини за неудобства 😬",
                          parse_mode="html")
 
-    elif db.token.count_documents({"id": encoder(key, str(message.chat.id))}) == 0:
-        db.token.insert_one({"id": encoder(key, str(message.chat.id)), "token": [], "idGitLab": []})
+    elif db.token.count_documents({"id": encoder(str(message.chat.id))}) == 0:
+        db.token.insert_one({"id": encoder(str(message.chat.id)), "token": [], "idGitLab": []})
 
         inline_item1 = types.InlineKeyboardButton('Как получить TOKEN',
                                                   url='https://habr.com/ru/company/flant/blog/340996/')
@@ -149,11 +149,11 @@ def process_step_1(message):
     if message.text == 'Ввод TOKEN':
         bot.register_next_step_handler(message, process_step_2)
     elif message.text == 'Выбор TOKEN':
-        cursor3 = db.token.find_one({"id": encoder(key, str(message.chat.id))})
+        cursor3 = db.token.find_one({"id": encoder(str(message.chat.id))})
         cur = []
         cursor4 = dict(cursor3)
         for j in cursor4["token"]:
-            cur.append(decoder(key, j))
+            cur.append(decoder(j))
 
         bot.send_message(message.chat.id,
                          "Давай выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN:\n" + '\n'.join(cur),
@@ -161,11 +161,11 @@ def process_step_1(message):
 
         bot.register_next_step_handler(message, process_step_4)
     elif message.text == 'Удаление TOKEN':
-        cursor3 = db.token.find_one({"id": encoder(key, str(message.chat.id))})
+        cursor3 = db.token.find_one({"id": encoder(str(message.chat.id))})
         cur = []
         cursor4 = dict(cursor3)
         for j in cursor4["token"]:
-            cur.append(decoder(key, j))
+            cur.append(decoder(j))
 
         bot.send_message(message.chat.id,
                          "Давай выберем, какой TOKEN нужно удалить. Вот список твоих TOKEN:\n" + '\n'.join(cur),
@@ -178,11 +178,11 @@ def process_step_1(message):
 
 
 def process_step_2(message):
-    cursor3 = db.token.find_one({"id": encoder(key, str(message.chat.id))})
+    cursor3 = db.token.find_one({"id": encoder(str(message.chat.id))})
     cur = []
     cursor4 = dict(cursor3)
     for j in cursor4["token"]:
-        cur.append(decoder(key, j))
+        cur.append(decoder(j))
 
     if message.text in cur:
         bot.send_message(message.chat.id, "Данный TOKEN уже есть в нашей базе данных", parse_mode="html",
@@ -196,17 +196,17 @@ def process_step_2(message):
         bot.register_next_step_handler(message, process_step_4)
     else:
         cur.append(message.text)
-        db.token.find_one_and_update({"id": encoder(key, str(message.chat.id))}, {'$set': {"token": encoder(key, cur)}})
+        db.token.find_one_and_update({"id": encoder(str(message.chat.id))}, {'$set': {"token": encoder(cur)}})
         bot.send_message(message.chat.id,
                          "Ваш TOKEN был успешно добавлен в нашу базу данных 🎉",
                          parse_mode="html",
                          reply_markup=types.ReplyKeyboardRemove())
 
-        cursor3 = db.token.find_one({"id": encoder(key, str(message.chat.id))})
+        cursor3 = db.token.find_one({"id": encoder(str(message.chat.id))})
         cur = []
         cursor4 = dict(cursor3)
         for j in cursor4["token"]:
-            cur.append(decoder(key, j))
+            cur.append(decoder(j))
 
         bot.send_message(message.chat.id,
                          "Теперь давай выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN:\n" +
@@ -216,19 +216,19 @@ def process_step_2(message):
 
 
 def process_step_4(message):
-    cursor3 = db.token.find_one({"id": encoder(key, str(message.chat.id))})
+    cursor3 = db.token.find_one({"id": encoder(str(message.chat.id))})
     cur = []
     cursor4 = dict(cursor3)
     for j in cursor4["token"]:
-        cur.append(decoder(key, j))
+        cur.append(decoder(j))
 
     if message.text in cur:
         try:
             gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=message.text)
             gl.auth()
             username = gl.user.username
-            db.token.find_one_and_update({"id": encoder(key, str(message.chat.id)), "token": encoder(key, cur)},
-                                         {'$set': {"idGitLab": encoder(key, username)}})
+            db.token.find_one_and_update({"id": encoder(str(message.chat.id)), "token": encoder(cur)},
+                                         {'$set': {"idGitLab": encoder(username)}})
 
         except gitlab.GitlabAuthenticationError:
             st = open('/static/access_denied.webp', 'rb')
@@ -249,19 +249,19 @@ def process_step_5(message):
     else:
         name_user = "@" + message.chat.username
 
-    cursor3 = db.token.find_one({"id": encoder(key, str(message.chat.id))})
+    cursor3 = db.token.find_one({"id": encoder(str(message.chat.id))})
     cur = []
     cursor4 = dict(cursor3)
     for j in cursor4["token"]:
-        cur.append(decoder(key, j))
+        cur.append(decoder(j))
 
     if message.text in cur:
         for j, i in enumerate(cur):
             if message.text == i:
                 cur.pop(j)
 
-        db.token.find_one_and_update({"id": encoder(key, str(message.chat.id))},
-                                     {'$set': {"token": encoder(key, cur)}})
+        db.token.find_one_and_update({"id": encoder(str(message.chat.id))},
+                                     {'$set': {"token": encoder(cur)}})
 
         bot.send_message(message.chat.id,
                          "Ваш TOKEN ( " + message.text + " ) был удачно удален из нашей базы данных",
