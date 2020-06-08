@@ -48,7 +48,7 @@ class WebhookServer(object):
                         if action is not None and result:
                             # для каждого телеграм аккаунта, прикрепленного к этому юзеру
                             for j, file in enumerate(result['diffs']):
-                                if action == 'open':
+                                if action == 'open' or action == 'merged':
                                     diff = "```" + str(file['diff']).replace("```", "\`\`\`") + "```"
                                     message = "Пользователь {0} отправил Вам " \
                                               "запрос на слитие веток {1} и {2} " \
