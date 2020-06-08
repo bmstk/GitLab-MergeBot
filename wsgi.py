@@ -46,7 +46,7 @@ def send_welcome(message):
     else:
         name_user = "@" + message.chat.username
 
-    st = open('static/privet.webp', 'rb')
+    st = open('./static/privet.webp', 'rb')
     bot.send_sticker(message.chat.id, st)
 
     if 5 <= timer[3] < 11:
@@ -231,7 +231,7 @@ def process_step_4(message):
                                          {'$set': {"idGitLab": encoder(username)}})
 
         except gitlab.GitlabAuthenticationError:
-            st = open('/static/access_denied.webp', 'rb')
+            st = open('./static/access_denied.webp', 'rb')
             bot.send_sticker(message.chat.id, st)
 
             bot.send_message(message.chat.id,
@@ -291,7 +291,7 @@ def process_step_5(message):
 
 @bot.message_handler(commands=['problem'])
 def send_problem(message):
-    st = open('static/problem.webp', 'rb')
+    st = open('./static/problem.webp', 'rb')
     bot.send_sticker(message.chat.id, st)
 
     bot.send_message(message.chat.id,
@@ -317,7 +317,7 @@ def process_step_3(message):
 
 @bot.message_handler(commands=['help'])
 def send_instruction(message):
-    st = open('/static/instruction_2.0.webp', 'rb')
+    st = open('./static/instruction_2.0.webp', 'rb')
     bot.send_sticker(message.chat.id, st)
 
     bot.send_message(message.chat.id,
