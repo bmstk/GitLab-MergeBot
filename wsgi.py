@@ -185,15 +185,10 @@ def process_step_2(message):
         cur.append(decoder(j))
 
     if message.text in cur:
-        bot.send_message(message.chat.id, "Данный TOKEN уже есть в нашей базе данных", parse_mode="html",
-                         reply_markup=types.ReplyKeyboardRemove())
-
         bot.send_message(message.chat.id,
-                         "Давай тогда выберем, какой TOKEN нужно использовать. "
-                         "Вот список твоих TOKEN:\n" + '\n'.join(cur),
-                         parse_mode="html")
-
-        bot.register_next_step_handler(message, process_step_4)
+                         "Данный TOKEN уже есть в нашей базе данных",
+                         parse_mode="html",
+                         reply_markup=types.ReplyKeyboardRemove())
     else:
         cur.append(message.text)
         db.token.find_one_and_update({"id": encoder(str(message.chat.id))}, {'$set': {"token": encoder(cur)}})
@@ -202,17 +197,20 @@ def process_step_2(message):
                          parse_mode="html",
                          reply_markup=types.ReplyKeyboardRemove())
 
-        cursor3 = db.token.find_one({"id": encoder(str(message.chat.id))})
-        cur = []
-        cursor4 = dict(cursor3)
-        for j in cursor4["token"]:
-            cur.append(decoder(j))
+        try:
+            gl = Gitlab('https://git.iu7.bmstu.ru/', private_token=message.text)
+            gl.auth()
+            username = gl.user.username
+            db.token.find_one_and_update({"id": encoder(str(message.chat.id)), "token": encoder(cur)},
+                                         {'$set': {"idGitLab": encoder(username)}})
 
-        bot.send_message(message.chat.id,
-                         "Теперь давай выберем, какой TOKEN нужно использовать. Вот список твоих TOKEN:\n" +
-                         '\n'.join(cur), parse_mode="html")
+        except gitlab.GitlabAuthenticationError:
+            st4 = open('./static/access_denied.webp', 'rb')
+            bot.send_sticker(message.chat.id, st4)
 
-        bot.register_next_step_handler(message, process_step_4)
+            bot.send_message(message.chat.id,
+                             "Произошла ошибка при авторизации в GitLab. Проверьте правильность токена",
+                             parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
 
 
 def process_step_4(message):
