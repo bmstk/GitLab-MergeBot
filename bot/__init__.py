@@ -84,7 +84,7 @@ class WebhookServer(object):
                                     break  # прерываем вывод сообщений, чтобы не засорять чат
                         else:
                             message = "В репозитории {0} произошло неопознанное событие".format(project_name)
-                            bot.send_message(chat_id=receiver['id'], text=message)
+                            bot.send_message(chat_id=decoder(receiver['id']), text=message)
                         # отсылаем кнопочку со ссылкой на merge request
                         inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
                         inline_bt1 = types.InlineKeyboardMarkup()
