@@ -55,6 +55,13 @@ class WebhookServer(object):
                                 bot.send_message(chat_id=decoder(receiver['id']), text=message + diff,
                                                  parse_mode="markdown")
 
+                            if action == 'reopen' and j < 1:
+                                message = "В проекте \"{0}\" пользователем {1} " \
+                                          "был переоткрыт merge request {2)".format(project_name,
+                                                                                    author_name,
+                                                                                    mg_title)
+                                bot.send_message(chat_id=receiver['id'], text=message)
+
                             if action == 'update' and j < 1:
                                 message = "В Merge Request {0} произошло новое событие.".format(mg_title)
                                 bot.send_message(chat_id=decoder(receiver['id']), text=message)
@@ -69,7 +76,7 @@ class WebhookServer(object):
 
                             if (action == 'update' or action == 'close' or action == 'none') and j >= 1 and len(
                                     result['diffs']) - 1 != 0:
-                                message = "А так же еще {0} изменений".format(len(result['diffs']) - 1)
+                                message = "А так же еще изменения в {0} файлах".format(len(result['diffs']) - 1)
                                 bot.send_message(chat_id=decoder(receiver['id']), text=message)
                                 break  # прерываем вывод сообщений, чтобы не засорять чат
 
