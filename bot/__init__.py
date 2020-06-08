@@ -27,7 +27,8 @@ class WebhookServer(object):
             try:
                 action = raw_json['object_attributes']['action']  # действие
             except KeyError:
-                action = 'none'
+                action = None
+            result = None
             ##########################################################################################
 
             for i in assignees_array:  # для каждого пользователя
@@ -40,46 +41,50 @@ class WebhookServer(object):
                     gl = gitlab.Gitlab('https://git.iu7.bmstu.ru/',
                                        private_token=decoder(private_key['token'][-1]))  # ['token'][-1]
                     project = gl.projects.get(project_id)  # находим проект
-                    result = project.repository_compare(target_branch, source_branch)
+                    if action is not None:
+                        result = project.repository_compare(target_branch, source_branch)
                     for receiver in db.token.find({'idGitLab': encoder(i['username'])}):
-                        # для каждого телеграм аккаунта, прикрепленного к этому юзеру
-                        for j, file in enumerate(result['diffs']):
-                            if action == 'open':
-                                diff = "```" + str(file['diff']).replace("```", "\`\`\`") + "```"
-                                message = "Пользователь {0} отправил Вам " \
-                                          "запрос на слитие веток {1} и {2} " \
-                                          "в проекте {3}\n".format(author_name,
-                                                                   target_branch,
-                                                                   source_branch,
-                                                                   project_name).replace("_", "\_")
-                                bot.send_message(chat_id=decoder(receiver['id']), text=message + diff,
-                                                 parse_mode="markdown")
+                        if action is not None and result:
+                            # для каждого телеграм аккаунта, прикрепленного к этому юзеру
+                            for j, file in enumerate(result['diffs']):
+                                if action == 'open':
+                                    diff = "```" + str(file['diff']).replace("```", "\`\`\`") + "```"
+                                    message = "Пользователь {0} отправил Вам " \
+                                              "запрос на слитие веток {1} и {2} " \
+                                              "в проекте {3}\n".format(author_name,
+                                                                       target_branch,
+                                                                       source_branch,
+                                                                       project_name).replace("_", "\_")
+                                    bot.send_message(chat_id=decoder(receiver['id']), text=message + diff,
+                                                     parse_mode="markdown")
 
-                            if action == 'reopen' and j < 1:
-                                message = "В проекте \"{0}\" пользователем {1} " \
-                                          "был переоткрыт merge request {2)".format(project_name,
-                                                                                    author_name,
-                                                                                    mg_title)
-                                bot.send_message(chat_id=receiver['id'], text=message)
+                                if action == 'reopen' and j < 1:
+                                    message = "В проекте \"{0}\" пользователем {1} " \
+                                              "был переоткрыт merge request {2)".format(project_name,
+                                                                                        author_name,
+                                                                                        mg_title)
+                                    bot.send_message(chat_id=receiver['id'], text=message)
 
-                            if action == 'update' and j < 1:
-                                message = "В Merge Request {0} произошло новое событие.".format(mg_title)
-                                bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                if action == 'update' and j < 1:
+                                    message = "В Merge Request {0} произошло новое событие.".format(mg_title)
+                                    bot.send_message(chat_id=decoder(receiver['id']), text=message)
 
-                            if action == 'close' and j < 1:
-                                message = "Merge request {0} был закрыт.".format(mg_title)
-                                bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                if action == 'close' and j < 1:
+                                    message = "Merge request {0} был закрыт.".format(mg_title)
+                                    bot.send_message(chat_id=decoder(receiver['id']), text=message)
 
-                            if action == 'none' and j < 1:
-                                message = "В Merge Request {0} произошло новое событие.".format(mg_title)
-                                bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                if action == 'none' and j < 1:
+                                    message = "В Merge Request {0} произошло новое событие.".format(mg_title)
+                                    bot.send_message(chat_id=decoder(receiver['id']), text=message)
 
-                            if (action == 'update' or action == 'close' or action == 'none') and j >= 1 and len(
-                                    result['diffs']) - 1 != 0:
-                                message = "А так же еще изменения в {0} файлах".format(len(result['diffs']) - 1)
-                                bot.send_message(chat_id=decoder(receiver['id']), text=message)
-                                break  # прерываем вывод сообщений, чтобы не засорять чат
-
+                                if (action == 'update' or action == 'close' or action == 'none') and j >= 1 and len(
+                                        result['diffs']) - 1 != 0:
+                                    message = "А так же еще изменения в {0} файлах".format(len(result['diffs']) - 1)
+                                    bot.send_message(chat_id=decoder(receiver['id']), text=message)
+                                    break  # прерываем вывод сообщений, чтобы не засорять чат
+                        else:
+                            message = "В репозитории {0} произошло неопознанное событие".format(project_name)
+                            bot.send_message(chat_id=receiver['id'], text=message)
                         # отсылаем кнопочку со ссылкой на merge request
                         inline_item1 = types.InlineKeyboardButton('Merge Request', url=merge_request_url)
                         inline_bt1 = types.InlineKeyboardMarkup()
